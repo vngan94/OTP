@@ -1,0 +1,140 @@
+<%-layout('layout/layout')%>
+    <style>
+        div>li:hover {
+            cursor: pointer;
+            border: 1px solid black;
+        }
+
+        .style-border {
+            border: 1px solid black !important;
+        }
+
+        ul div li:hover {
+            border: 1px solid black !important;
+        }
+        div li input{
+            display: none;
+        }
+        div li label{
+            width: 100%;
+            height: 100%;
+            padding: 8px 12px;
+        }
+        div li label:hover{
+            cursor: pointer;
+        }
+        #my_h3::before{
+            content: "";
+            display: block;
+            max-width: 800px;
+            min-width: 300px;
+            height: 4px;
+            margin: 50px auto 30px auto;
+            background-color: #a29bfe;;
+        }
+    </style>
+    <script src="/public/jquery/jquery-3.6.0.min.js"></script>
+    <script src="/public/js/product.js"></script>
+    <div class="">
+        <div class="container">
+            <div class="row mt-5">
+                <div class="col-md-7">
+                    <div class="row">
+                        <div class="col-lg-6 col-sm-12 pb-4">
+                            <img src="/public/img/product/<%=detail[0].IDHA%>.jpg" alt=""
+                                class="img-fluid h-100">
+                        </div>
+                        <div class="col-lg-6 col-sm-12 pb-4">
+                            <img src="/public/img/slider-img/lebron-19-basketball-shoes-pbfCF3-1.jpg" alt=""
+                                class="img-fluid">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-6 col-sm-12 pb-4">
+                            <img src="/public/img/slider-img/lebron-19-basketball-shoes-pbfCF3-1.jpg" alt=""
+                                class="img-fluid">
+                        </div>
+                        <div class="col-lg-6 col-sm-12 pb-4">
+                            <img src="/public/img/slider-img/lebron-19-basketball-shoes-pbfCF3-1.jpg" alt=""
+                                class="img-fluid">
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-5 pd-1">
+                    <h2><%=detail[0].TENSP%></h2>
+                    <p><%=detail[0].CTLOAI%></p>
+                    <p><%=detail[0].GIA%>VND</p>
+                    <p style="font-style: italic;">Size Guide</p>
+                    <form action="/fermeh/add-to-cart/<%=detail[0].MASP%>" method="post">
+                        <ul style="list-style: none;padding: 0 0 0 12px;">
+                            <%for(let i=0;i<Math.floor((detail[0].MAXSIZE-detail[0].MINSIZE+1)/3);i++){%>             
+                                <div class="row list-size">
+                                    <%for(let j=0;j<3;j++){%>
+                                        <li class="col-3 border border-1 rounded-3 mb-2 me-2 text-center">
+                                            <label for="size_choose_<%=detail[0].MINSIZE+j+i*3%>"><%=detail[0].MINSIZE+j+i*3%></label>
+                                            <input type="radio" name="size_choose" id="size_choose_<%=detail[0].MINSIZE+j+i*3%>"
+                                            value="<%=detail[0].MINSIZE+j+i*3%>" class="radio-button">
+                                        </li>
+                                    <%}%>
+                                </div>
+                            <%}%>
+                            <%if((detail[0].MAXSIZE-detail[0].MINSIZE+1)%3>0){%>
+                                <div class="row list-size">
+                                    <%for(let j=0;j<(detail[0].MAXSIZE-detail[0].MINSIZE+1)%3;j++){%>
+                                        <li class="col-3 border border-1 rounded-3  mb-2 me-2 text-center">
+                                            <label for="size_choose_<%=detail[0].MAXSIZE-(detail[0].MAXSIZE-detail[0].MINSIZE+1)%3+j+1%>">
+                                                <%=detail[0].MAXSIZE-(detail[0].MAXSIZE-detail[0].MINSIZE+1)%3+j+1%>
+                                            </label>
+                                            <input type="radio" name="size_choose" id="size_choose_<%=detail[0].MAXSIZE-(detail[0].MAXSIZE-detail[0].MINSIZE+1)%3+j+1%>"
+                                            value="<%=detail[0].MAXSIZE-(detail[0].MAXSIZE-detail[0].MINSIZE+1)%3+j+1%>" class="radio-button">
+                                        </li>
+                                    <%}%>
+                                </div>
+                            <%}%>
+                        </ul>
+                        <p class="text-danger warning-text" style="margin-top: -8px;"></p>
+                        <div class="row mb-3 mt-2 ps-2">
+                            <button class="btn btn-dark rounded-pill py-3 " style="width: calc(75% + 16px);" id="add-to-cart" type="submit">
+                                THÊM VÀO GIỎ HÀNG
+                            </button>
+                            <a href="#" ></a>
+                        </div>
+                        <div class="row mb-3 ps-2">
+                            <button class="btn btn-light rounded-pill py-3 border border-2" style="width: calc(75% + 16px);" type="submit" id="add-to-love">
+                                YÊU THÍCH
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="container-fluid  pb-3">
+            <h3 style="font-size: 35px;font-weight: 600;text-align: center;" id="my_h3">SẢN PHẨM LIÊN QUAN</h3>
+            <div class="container">
+                <div class="d-flex justify-content-around flex-wrap">
+                    <%for(let i=0;i<4;i++){%>
+                        <div class="card">
+                            <!--width: 300px; -->
+                            <a href="/fermeh/detail/<%=list[i].MASP%>" class="text-black text-decoration-none">
+                                <img src="/public/img/product/<%=list[i].IDHA%>.jpg" class="card-img-top"
+                                alt="..." /> </a>
+                            <div class=" card-body">
+                                <a href="/fermeh/detail/<%=list[i].MASP%>" class="text-black text-decoration-none">
+                                    <h5 class="card-title">
+                                        <%=list[i].TENSP%>
+                                    </h5>
+                                </a>
+                                <p class="card-text"><%=list[i].CTLOAI%></p>
+                                <h3>
+                                    <%=list[i].GIA%> VND
+                                </h3>
+                                <a href="/fermeh/detail/<%=list[0].MASP%>" class="btn btn-primary">Mua ngay</a>
+                            </div>
+        
+                        </div>
+                    <%}%>
+                    
+                </div>
+            </div>
+        </div>
+    </div>

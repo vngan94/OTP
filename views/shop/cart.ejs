@@ -1,0 +1,41 @@
+<%-layout('layout/layout')%>
+<style>
+    body{
+        background-color: #f5f5f5;
+    }
+    .head-item{
+        width: 25%;
+        color: #888;
+        text-align: center;
+        display: inline-block;
+    }
+    .list-items{
+        background-color: #fff;
+        padding: 15px 20px;
+        margin-top: 15px;
+    }
+    .non-product{
+        background: url("/public/img/New_folder/download.png");
+        background-repeat: no-repeat;
+        background-position: center;
+        background-color: #fff;
+    }
+</style>
+<div class="container" style="min-height: 800px;">
+    <div class="row list-items mb-4">
+        <h5 style="font-weight: 600;">GIỎ HÀNG</h5>
+    </div>
+    <div class="row list-items">
+        <div class="col-md-6 col-sm-12"><input type="checkbox" class="form-check-input me-2"> Sản phẩm</div>
+        <div class="col-md-6 d-flex">
+            <div class="head-item">Đơn giá</div>
+            <div class="head-item">Số lượng</div>
+            <div class="head-item">Số tiền</div>
+            <div class="head-item">Thao tác</div>
+        </div>
+    </div>
+    <div class="row mt-5 non-product" style="height: 500px;">
+        <div style="font-size: 20px;font-weight: 300;
+        position: relative;top: 68%;text-align: center;">Chưa có sản phẩm nào</div>
+    </div>
+</div>
