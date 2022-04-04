@@ -20,4 +20,16 @@ $(document).ready(() => {
             document.querySelector('.warning-text').innerText = 'Vui lòng chọn size!'
         }
     }
+    var addFav = document.querySelector("#add-to-love")
+    var sizeFav = document.querySelector("#size_to_fav")
+    addFav.onclick = (e) => {
+        let cnt = 0;
+        for (let i of radio_button) {
+            if (i.checked) { cnt++; sizeFav.value = i.value }
+        }
+        if (cnt == 0) {
+            e.preventDefault()
+            document.querySelector('.warning-text').innerText = 'Vui lòng chọn size!'
+        }
+    }
 })

@@ -1,0 +1,158 @@
+<%-layout('layout/layout')%>
+    <style>
+        .setting-item {
+            padding: 15px 0;
+            margin: 10px 0 5px 0;
+            transition: all 0.2s;
+            align-items: center;
+        }
+
+        .setting-item:hover {
+            cursor: pointer;
+            background-color: #ccc !important;
+        }
+
+        .setting-item p {
+            display: inline-block;
+            color: rgb(53, 53, 255);
+            font-size: 18px;
+            margin: 0 0 0 7px;
+            text-decoration: none;
+        }
+
+        .setting-item p:hover {
+            color: rgb(53, 53, 255);
+            text-decoration: underline;
+        }
+        .setting-item form{
+            display: none;
+        }
+        h4,
+        h3 {
+            padding-left: 0 !important;
+            margin-bottom: 0;
+        }
+        .width-100{
+            width: 100% !important;
+        }
+    </style>
+    <div class="container" style="min-height: 800px;background-color: #fff;">
+        <div class="contain">
+            <div class="row" style="padding: 70px 0 20px 0; border-bottom: 2px solid #ccc;">
+                <h3 style="text-transform: uppercase;">Cài đặt tài khoản</h3>
+            </div>
+            <div class="row">
+                <div class="d-flex setting-item" style="flex-wrap: wrap;">
+                    <div class="w-25">
+                        <h4>Tên người dùng</h4>
+                    </div>
+                    <div class="w-50">
+                        <h4><%=set[0].TENKH%></h4>
+                    </div>
+                    <div class="w-25">
+                        <i class="fa-solid fa-pen"></i>
+                        <p href="#" class="">Chỉnh sửa</p>
+                    </div>
+                    <!-- form -->
+                    <form class="ps-0 w-50" style="margin: 0 auto;" action="/fermeh/user/changeUsername" method="post">
+                        <div class="mb-3">
+                            <label for="currentName" class="form-label">Tên hiện tại</label>
+                            <input type="text" class="form-control" id="currentName" 
+                                required readonly placeholder="<%=set[0].TENKH%>">
+                        </div>
+                        <div class="mb-3">
+                            <label for="newName" class="form-label">Tên mới</label>
+                            <input type="text" class="form-control" name="newName" id="newName" required placeholder="Nhập tên bạn muốn thay đổi!">
+                        </div>
+                        <button type="submit" class="btn btn-dark">Lưu thay đổi</button>
+                        <button type="button" class="btn btn-dark">Hủy</button>
+                    </form>
+                </div>
+                <div style="height: 5px;border-bottom: 1px solid #ccc;"></div>
+                <div class="d-flex setting-item" style="flex-wrap: wrap;">
+                    <div class="w-25">
+                        <h4>Số điện thoại</h4>
+                    </div>
+                    <div class="w-50">
+                        <h4><%=set[0].SDT%></h4>
+                    </div>
+                    <div class="w-25">
+                        <i class="fa-solid fa-pen"></i>
+                        <p href="#" class="">Chỉnh sửa</p>
+                    </div>
+                    <!-- form -->
+                    <form class="ps-0 w-50" style="margin: 0 auto;" action="/fermeh/user/changePhoneNumber" method="post">
+                        <div class="mb-3">
+                            <label for="currentPhone" class="form-label">Số điện thoại</label>
+                            <input type="text" class="form-control" id="currentPhone" 
+                                required readonly placeholder="<%=set[0].SDT%>">
+                        </div>
+                        <div class="mb-3">
+                            <label for="newPhone" class="form-label">Số điện thoại mới</label>
+                            <input type="text" class="form-control" id="newPhone" name="newPhone" required placeholder="Nhập số điện thoại mới!">
+                        </div>
+                        <button type="submit" class="btn btn-dark">Lưu thay đổi</button>
+                        <button type="button" class="btn btn-dark">Hủy</button>
+                    </form>
+                </div>
+                <div style="height: 5px;border-bottom: 1px solid #ccc;"></div>
+                <div class="d-flex setting-item" style="flex-wrap: wrap;">
+                    <div class="w-25">
+                        <h4>Email</h4>
+                    </div>
+                    <div class="w-50">
+                        <h4><%if(set[0].EMAIL=='none'){%>Bạn vẫn chưa đặt email<%}else{%>set[0].EMAIL<%}%></h4>
+                    </div>
+                    <div class="w-25">
+                        <i class="fa-solid fa-pen"></i>
+                        <p class="">Chỉnh sửa</p>
+                    </div>
+                    <!-- form -->
+                    <form class="ps-0 w-50" style="margin: 0 auto;" action="/fermeh/user/changeEmail" method="post">
+                        <div class="mb-3">
+                            <label for="curentEmail" class="form-label">Email hiện tại</label>
+                            <input type="text" class="form-control" id="curentEmail" 
+                                required readonly placeholder="<%if(set[0].EMAIL=='none'){%>Bạn vẫn chưa đặt email<%}else{%>set[0].EMAIL<%}%>">
+                        </div>
+                        <div class="mb-3">
+                            <label for="newEmail" class="form-label">Email mới</label>
+                            <input type="email" class="form-control" name="newEmail" id="newEmail" required placeholder="Nhập email mới!">
+                        </div>
+                        <button type="submit" class="btn btn-dark">Lưu thay đổi</button>
+                        <button type="button" class="btn btn-dark">Hủy</button>
+                    </form>
+                </div>
+                <div style="height: 5px;border-bottom: 1px solid #ccc;"></div>
+                <div class="d-flex setting-item" style="flex-wrap: wrap;">
+                    <div class="w-25">
+                        <h4>Mật khẩu</h4>
+                    </div>
+                    <div class="w-50">
+                        <h4>**********</h4>
+                    </div>
+                    <div class="w-25">
+                        <i class="fa-solid fa-pen"></i>
+                        <p  class="">Chỉnh sửa</p>
+                    </div>
+                    <!-- form -->
+                    <form class="ps-0 w-50" style="margin: 0 auto;" action="/fermeh/user/changePasword" method="post">
+                        <div class="mb-3" style="position: relative;">
+                            <label for="rewritePass" class="form-label">Mật khẩu hiện tại</label>
+                            <input type="password" class="form-control" id="rewritePass" name="currentPass"
+                                required placeholder="Nhập mật khẩu hiện tại">
+                            <span style="position: absolute;top: 40px;left: 96%;color: #aaa;" id="eyeRewritePass"><i class="fa-solid fa-eye"></i></span>
+                        </div>
+                        <div class="mb-3" style="position: relative;">
+                            <label for="newPass" class="form-label">Mật khẩu mới</label>
+                            <input type="password" class="form-control" name="newPass"  id="newPass" required placeholder="Nhập mật khẩu mới">
+                            <span style="position: absolute;top: 40px;left: 96%;color: #aaa;" id="eyeNewPass"><i class="fa-solid fa-eye"></i></span>
+                        </div>
+                        <button type="submit" class="btn btn-dark">Lưu thay đổi</button>
+                        <button type="button" class="btn btn-dark">Hủy</button>
+                    </form>
+                </div>
+                <div style="height: 5px;border-bottom: 1px solid #ccc;"></div>
+            </div>
+        </div>
+    </div>
+    <script src="/public/js/user/setting.js"></script>

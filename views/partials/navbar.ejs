@@ -20,8 +20,9 @@
                 <div class="col-md-6">
                     <div class="row">
                         <div class="col-md-6"></div>
-                        <div class="col-md-3 col-6 "><a href="#" class="nav-link text-end" style="color: #fff;"><i
-                                    class="far fa-heart" style="padding-right: 10px;"></i>Yêu thích</a>
+                        <div class="col-md-3 col-6 "><a href="/fermeh/favourite" class="nav-link text-end"
+                                style="color: #fff;"><i class="far fa-heart" style="padding-right: 10px;"></i>Yêu
+                                thích</a>
                         </div>
                         <div class="col-md-3 col-6 top-header-item-user">
                             <a href="#" class="nav-link text-md-end text-sm-start" id="text-infor-user"
@@ -111,11 +112,11 @@
         else {
             login_signup.innerHTML = '';
             let order = document.createElement("a")
-            order.href = "/fermeh/order"; order.innerText = "Đơn mua"
+            order.href = "/fermeh/user/order"; order.innerText = "Đơn mua"
             let setting = document.createElement("a")
-            setting.href = "/fermeh/setting"; setting.innerText = "Cài đặt"
+            setting.href = "/fermeh/user/setting"; setting.innerText = "Cài đặt"
             let logout = document.createElement("a")
-            logout.href = "/fermeh/logout"; logout.innerText = "Đăng xuất"
+            logout.href = "/fermeh/user/logout"; logout.innerText = "Đăng xuất"
             login_signup.appendChild(order)
             login_signup.appendChild(setting)
             login_signup.appendChild(logout)
