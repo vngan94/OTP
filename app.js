@@ -127,31 +127,46 @@ app.post('/fermeh/signup', CatchAsync(async (req, res) => {
     }).then((res) => { cipherPass = res.data.Digest })
         .catch((err) => { console.log("errrrr", err) })
     var vnf_regex = /((09|03|07|08|05)+([0-9]{8})\b)/g;
+    var regex_password = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
     if (vnf_regex.test(phoneNum)) {
         let pool = await conn;
         let sqlString = `exec exe_checkSDT @sdt='${phoneNum}'`
         await pool.request().query(sqlString, async (err, data) => {
             if (data.recordset.length === 0) {
-                let sqlString = `exec exe_insertKH @tenkh,@matkhau,@sdt`
-                await pool.request()
-                    .input('tenkh', sql.NVarChar, name)
-                    .input('matkhau', sql.NVarChar, cipherPass)
-                    .input('sdt', sql.NVarChar, phoneNumber.trim())
-                    .query(sqlString, (err, data) => {
-                        //console.log('insert thanh cong')
-                        //console.log(phoneNumber)
+                if (regex_password.test(pass)) {
+                    let sqlString = `exec exe_insertKH @tenkh,@matkhau,@sdt`
+                    await pool.request()
+                        .input('tenkh', sql.NVarChar, name)
+                        .input('matkhau', sql.NVarChar, cipherPass)
+                        .input('sdt', sql.NVarChar, phoneNumber.trim())
+                        .query(sqlString, (err, data) => {
+                            //console.log('insert thanh cong')
+                            //console.log(phoneNumber)
+                        })
+                    res.render("shop/login", { title: "Đăng nhập", message: "" })
+                }
+                else {
+                    res.render('shop/signup', {
+                        title: "Đăng ký", message: 'Mật khẩu phải có ít nhất 8 kí tự và phải có ít nhất cả chữ và số!'
+                        , username: req.body.name, phone: req.body.phoneNumber
                     })
-                res.render("shop/login", { title: "Đăng nhập", message: "" })
+                }
             }
             else {
-                res.render('shop/signup', { title: "Đăng ký", message: 'Số điện thoại đã tồn tại!' })
+                res.render('shop/signup', {
+                    title: "Đăng ký", message: 'Số điện thoại đã tồn tại!'
+                    , pass: req.body.password, username: req.body.name
+                })
             }
-            //console.log(data.recordset)
         })
     }
     else {
-        res.render('shop/signup', { title: "Đăng ký", message: 'Số điện thoại không đúng!' })
+        res.render('shop/signup', {
+            title: "Đăng ký", message: 'Số điện thoại không đúng!'
+            , pass: req.body.password, username: req.body.name
+        })
     }
+
 }))
 app.get('/fermeh/signup', async (req, res) => {
 
@@ -176,49 +191,55 @@ app.post('/fermeh/login', CatchAsync(async (req, res) => {
     // console.log(cipherPass)
     // console.log(phoneNum)
     var vnf_regex = /((09|03|07|08|05)+([0-9]{8})\b)/g;
-    if (vnf_regex.test(phoneNum)) {
-        let pool = await conn; var l_data = []
-        let sqlString = `exec exe_checkSDT @sdt='${phoneNum}'`
-        await pool.request().query(sqlString, async (err, data) => {
-            l_data = data.recordset
-            //console.log('data', data.recordset)
-            if (data.recordset.length === 0) {
-                res.render('shop/login', { title: "Đăng nhập", message: 'Số điện thoại hoặc mật khẩu không đúng!' })
-            }
-            else {
-                let sqlString1 = `exec exe_findKH @sdt='${phoneNum.trim()}',@matkhau='${cipherPass.trim()}'`
-                try {
-                    return await pool.request()
-                        .query(sqlString1, async (err, data1) => {
-                            //console.log('select thanh cong')
-                            //console.log(phoneNum, cipherPass)
-                            //console.log(sqlString1)
-                            if (data1.recordset.length === 0) {
-                                //console.log(data1.recordset)
-                                res.render('shop/login', { title: "Đăng nhập", message: 'Số điện thoại hoặc mật khẩu không đúng!' })
-                            }
-                            else {
-                                sdt = l_data[0].SDT
-                                taikhoan = `${l_data[0].TENKH}`
-                                cookie = req.cookies;
-                                for (var prop in cookie) {
-                                    // if (!cookie.hasOwnProperty(prop)) {
-                                    //     continue;
-                                    // }
-                                    res.cookie(prop, '', { expires: new Date(0) });
-                                }
-                                res.redirect("/fermeh")
-                            }
-                        })
-                }
-                catch (e) {
+    var regex_password = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+    if (regex_password.test(pass)) {
+        if (vnf_regex.test(phoneNum)) {
+            let pool = await conn; var l_data = []
+            let sqlString = `exec exe_checkSDT @sdt='${phoneNum}'`
+            await pool.request().query(sqlString, async (err, data) => {
+                l_data = data.recordset
+                //console.log('data', data.recordset)
+                if (data.recordset.length === 0) {
                     res.render('shop/login', { title: "Đăng nhập", message: 'Số điện thoại hoặc mật khẩu không đúng!' })
                 }
-            }
-        })
+                else {
+                    let sqlString1 = `exec exe_findKH @sdt='${phoneNum.trim()}',@matkhau='${cipherPass.trim()}'`
+                    try {
+                        return await pool.request()
+                            .query(sqlString1, async (err, data1) => {
+                                //console.log('select thanh cong')
+                                //console.log(phoneNum, cipherPass)
+                                //console.log(sqlString1)
+                                if (data1.recordset.length === 0) {
+                                    //console.log(data1.recordset)
+                                    res.render('shop/login', { title: "Đăng nhập", message: 'Số điện thoại hoặc mật khẩu không đúng!' })
+                                }
+                                else {
+                                    sdt = l_data[0].SDT
+                                    taikhoan = `${l_data[0].TENKH}`
+                                    cookie = req.cookies;
+                                    for (var prop in cookie) {
+                                        // if (!cookie.hasOwnProperty(prop)) {
+                                        //     continue;
+                                        // }
+                                        res.cookie(prop, '', { expires: new Date(0) });
+                                    }
+                                    res.redirect("/fermeh")
+                                }
+                            })
+                    }
+                    catch (e) {
+                        res.render('shop/login', { title: "Đăng nhập", message: 'Số điện thoại hoặc mật khẩu không đúng!' })
+                    }
+                }
+            })
+        }
+        else {
+            res.render('shop/login', { title: "Đăng nhập", message: 'Số điện thoại không đúng!' })
+        }
     }
     else {
-        res.render('shop/login', { title: "Đăng nhập", message: 'Số điện thoại không đúng!' })
+        res.render('shop/login', { title: "Đăng nhập", message: 'Số điện thoại hoặc mật khẩu không đúng!' })
     }
 
 }))
@@ -316,7 +337,7 @@ app.post('/fermeh/fav/del-product', CatchAsync(async (req, res) => {
     res.redirect(`/fermeh/favourite`)
 }))
 //
-//-------------------------------CART
+//-------------------------------CART MODAL----------------------------------------------------
 //
 app.post('/fermeh/add-to-cart/:id', CatchAsync(async (req, res) => {
     let cnt = 0;
@@ -346,49 +367,72 @@ app.get("/fermeh/cart", async (req, res) => {
                     if (i === 'loadProduct') continue;
                     cnt = 0
                     let arr = i.split('_')
+                    //console.log('arr=', arr)
                     for (let j of data.recordset) {
                         if (j.MASP == parseInt(arr[1]) && j.SIZE == parseInt(arr[2])) {
                             let updateProduct = `exec exe_updateCTGH @sdt='${sdt}',@masp=${parseInt(arr[1])},@size=${parseInt(arr[2])} ,@soluong=${parseInt(listProduct[i])} `
                             pool.request().query(updateProduct, (err, data) => {
                                 console.log("update product successful")
                             })
+
                             cnt++;
                         }
                     }
                     if (cnt === 0) {
                         let insertProduct = `exec exe_insertCTGH @sdt='${sdt}',@masp=${parseInt(arr[1])},@size=${parseInt(arr[2])},@soluong =${parseInt(listProduct[i])}`
                         pool.request().query(insertProduct, (err, data) => {
-                            // console.log(arr)
+                            //console.log(arr)
                             // console.log(insertProduct)
                             console.log("insert product successful")
                         })
+
                     }
                 }
             }
             else {
                 for (let i in listProduct) {
                     if (i === 'loadProduct') continue;
-                    let insertProduct = `exec exe_insertCTGH @sdt='${sdt}',@masp=${parseInt(i.split('_')[1])},@size=${parseInt(i.split('_')[2])} ,@soluong =${listProduct[i]})`
+                    let insertProduct = `exec exe_insertCTGH @sdt='${sdt}',@masp=${parseInt(i.split('_')[1])},@size=${parseInt(i.split('_')[2])} ,@soluong =${parseInt(listProduct[i])}`
                     pool.request().query(insertProduct, (err, data) => {
+                        // console.log('i bằng', i)
+                        // console.log(`exec exe_insertCTGH @sdt='${sdt}',@masp=${parseInt(i.split('_')[1])},@size=${parseInt(i.split('_')[2])} ,@soluong =${parseInt(listProduct[i])})`)
+                        // console.log('list i bằng', listProduct[i])
                         console.log("insert product successful")
                     })
+
                 }
             }
         })
-        let renderCart = `exec exe_renderCart @sdt='${sdt}'`
-        pool.request().query(renderCart, (err, data) => {
-            //console.log(data.recordset)
-            if (data.recordset.length > 0) {
-                var tong = 0;
-                for (let i of data.recordset) {
-                    tong += i.GIA * i.SOLUONG
+        setTimeout(() => {
+            let renderCart = `exec exe_renderCart @sdt='${sdt}'`
+            pool.request().query(renderCart, (err, data) => {
+                //console.log(data.recordset)
+                if (data.recordset.length > 0) {
+                    var tong = 0;
+                    for (let i of data.recordset) {
+                        tong += i.GIA * i.SOLUONG
+                    }
+                    return res.render("shop/cart", { title: "Giỏ hàng", taikhoan: taikhoan, sdt: sdt, cart: data.recordset, tongtien: tong })
                 }
-                return res.render("shop/cart", { title: "Giỏ hàng", taikhoan: taikhoan, sdt: sdt, cart: data.recordset, tongtien: tong })
-            }
-            else {
-                return res.render("shop/cart", { title: "Giỏ hàng", taikhoan: taikhoan, sdt: sdt, cart: '', tongtien: 0 })
-            }
-        })
+                else {
+                    return res.render("shop/cart", { title: "Giỏ hàng", taikhoan: taikhoan, sdt: sdt, cart: '', tongtien: 0 })
+                }
+            })
+        }, 200);
+        // let renderCart = `exec exe_renderCart @sdt='${sdt}'`
+        // pool.request().query(renderCart, (err, data) => {
+        //     //console.log(data.recordset)
+        //     if (data.recordset.length > 0) {
+        //         var tong = 0;
+        //         for (let i of data.recordset) {
+        //             tong += i.GIA * i.SOLUONG
+        //         }
+        //         return res.render("shop/cart", { title: "Giỏ hàng", taikhoan: taikhoan, sdt: sdt, cart: data.recordset, tongtien: tong })
+        //     }
+        //     else {
+        //         return res.render("shop/cart", { title: "Giỏ hàng", taikhoan: taikhoan, sdt: sdt, cart: '', tongtien: 0 })
+        //     }
+        // })
     }
     else {
         let arr = req.cookies
@@ -473,18 +517,142 @@ app.get("/fermeh/user/setting", async (req, res) => {
             data.recordset[0].EMAIL = 'none'
         }
         if (data.recordset.length > 0) {
-            console.log(data.recordset[0].EMAIL)
-            res.render("user/setting", { title: 'Cài đặt', set: data.recordset, taikhoan: taikhoan, sdt: sdt })
+            let set = data.recordset
+            let sqlLocate = `exec exe_renderLocate '${sdt}'`
+            pool.request().query(sqlLocate, (err, data) => {
+                if (data.recordset.length > 0) {
+                    res.render("user/setting", { title: 'Cài đặt', set: set, taikhoan: taikhoan, sdt: sdt, diachi: data.recordset })
+                }
+                else {
+                    res.render("user/setting", { title: 'Cài đặt', set: set, taikhoan: taikhoan, sdt: sdt, diachi: 0 })
+                }
+            })
         }
         else {
             res.render("user/setting", { title: 'Cài đặt', taikhoan: taikhoan, sdt: sdt })
         }
     })
 })
+app.post('/fermeh/user/changeUsername', async (req, res) => {
+    res.redirect("/fermeh/user/setting");
+})
 //
+app.get('/fermeh/user/order', async (req, res) => {
+    res.render('user/order', { title: 'Đơn hàng đã mua', taikhoan: taikhoan, sdt: sdt })
+})
 //
 
-//
+//-----------------------------------AJAX-------------------------------
+app.post('/fermeh/ajax/update-quantity-product', async (req, res) => {
+    if (sdt != '') {
+        let pool = await conn;
+        let sqlString = `exec exe_updateCTGH '${sdt}',${parseInt(req.body.MASP)},${parseInt(req.body.SIZE)},${parseInt(req.body.SOLUONG)}`
+        await pool.request().query(sqlString, (err, data) => {
+        })
+        let sqlString1 = `select GIA from LOAISANPHAM where MASP=${parseInt(req.body.MASP)}`
+        await pool.request().query(sqlString1, (err, data) => {
+            console.log(data.recordset)
+            console.log('quantity-ajax')
+            res.send({ error: 0, GIA: data.recordset[0].GIA })
+        })
+    }
+    else {
+        let pool = await conn;
+        let sqlString = `select GIA from LOAISANPHAM where MASP=${parseInt(req.body.MASP)}`
+        await pool.request().query(sqlString, (err, data) => {
+            console.log(data.recordset)
+            console.log('quantity-ajax')
+            res.send({ error: 0, GIA: data.recordset[0].GIA })
+        })
+    }
+})
+app.post('/fermeh/ajax/update-size-product', async (req, res) => {
+    let coo = req.cookies
+    if (sdt != '') {
+        let newSize = req.body.SIZE
+        let pool = await conn;
+        let sqlCart = `exec exe_renderCart '${sdt}'`
+        let sqlString = `exec exe_updateSizeCTGH '${sdt}',${parseInt(req.body.MASP)},${parseInt(req.body.SIZE)},${parseInt(req.body.OLDSIZE)}`
+        await pool.request().query(sqlCart, (err, data) => {
+            let chk = false
+            if (data.recordset.length > 0) {
+                for (let obj of data.recordset) {
+                    if (obj.SIZE == parseInt(newSize) && obj.MASP == parseInt(req.body.MASP)) {
+                        chk = true
+                        res.send({ error: 1 })
+                    }
+                }
+                if (chk === false) {
+                    pool.request().query(sqlString, (err, data) => {
+                        console.log('update success')
+                        res.send({ error: 0 })
+                    })
+                }
+            }
+            else {
+                console.log('khong dc')
+            }
+        })
+    }
+    else {
+        console.log(req.cookies)
+        let cnt = 0;
+        for (let item in coo) {
+            if (item == 'loadProduct') continue
+            let arr = item.split('_')
+            if (arr[1].trim() == req.body.MASP && arr[2].trim() == req.body.SIZE) {
+                cnt++;
+            }
+        }
+        if (cnt === 1) res.send({ error: 1 })
+        else {
+            for (let item in coo) {
+                let arr = item.split('_')
+                if (arr[1].trim() == req.body.MASP.trim() && arr[2].trim() == req.body.OLDSIZE) {
+                    console.log('arr', arr)
+                    console.log('req', req.body.OLDSIZE, req.body.MASP, req.body.SIZE)
+                    console.log(item)
+                }
+            }
+            // res.cookie(`product_${req.body.MASP.trim()}_${req.body.SIZE}`, parseInt(req.body.SOLUONG))
+            res.send({ error: 0 })
+        }
+        console.log(req.cookies)
+        console.log('req body', JSON.stringify(req.body))
+    }
+})
+app.post('/fermeh/ajax/request-locate-tinh', CatchAsync(async (req, res) => {
+    let pool = await conn
+    let sqlString = `exec exe_requestTinh`
+    await pool.request().query(sqlString, (err, data) => {
+        if (data.recordset.length > 0) {
+            res.send({ tinh: data.recordset })
+        }
+    })
+}))
+app.post('/fermeh/ajax/request-locate-huyen', CatchAsync(async (req, res) => {
+    let matinh = req.body.matinh
+    let pool = await conn
+    let sqlString = `exec exe_requestHuyen '${matinh}'`
+    await pool.request().query(sqlString, (err, data) => {
+        if (data.recordset.length > 0) {
+            res.send({ huyen: data.recordset })
+        }
+    })
+
+}))
+app.post('/fermeh/ajax/request-locate-xa', CatchAsync(async (req, res) => {
+    let mahuyen = req.body.mahuyen
+    let pool = await conn
+    let sqlString = `exec exe_requestXa '${mahuyen}'`
+    await pool.request().query(sqlString, (err, data) => {
+        if (data.recordset.length > 0) {
+            res.send({ xa: data.recordset })
+        }
+    })
+
+}))
+//-----------------------------------AJAX-------------------------------
 app.all('*', (req, res, next) => {
     next(new ExpressError('Page not found', 404));
 })

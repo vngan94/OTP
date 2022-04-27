@@ -30,8 +30,8 @@
         }
 
         .product-img {
-            max-height: 150px;
-            max-width: 150px;
+            max-height: 130px;
+            max-width: 130px;
         }
 
         .btn {
@@ -109,7 +109,7 @@
             </div>
         </div>
         <%}else{%>
-            <div class="container" style="min-height: 800px;position: relative;">
+            <div class="container" style="min-height: 800px;position: relative;margin-bottom: 70px;">
                 <div class="row list-items mb-4">
                     <h5 style="font-weight: 700;">GIỎ HÀNG</h5>
                 </div>
@@ -118,7 +118,8 @@
                         <div class="list-items col-8" id="product_<%=i.MASP%>_<%=i.SIZE%>">
                             <div class="d-flex contain-product">
                                 <div class="product-img">
-                                    <img src="/public/img/product/<%=i.IDHA%>.jpg" alt="product" class="img-fluid" style="width: 100%;height: 100%;">
+                                    <img src="/public/img/product/<%=i.IDHA%>.jpg" alt="product" class="img-fluid"
+                                        style="width: 100%;height: 100%;">
                                 </div>
                                 <div style="width: 100%;">
                                     <div class="row">
@@ -131,12 +132,12 @@
                                                     <%=i.CTLOAI%>
                                                 </p>
                                                 <div class="d-flex" style="margin-top: 25px;">
-                                                    <div class="size-choice border-choice" style="max-height: 30px;">
+                                                    <div class="size-choice border-choice" style="max-height: 30px;z-index: 700;">
                                                         Size: <span style="margin-right: 3px;">
                                                             <%=i.SIZE%>
                                                         </span><i class="fa-solid fa-chevron-down"></i>
                                                     </div>
-                                                    <div class="size-detail" style="display: none;z-index: 100;">
+                                                    <div class="size-detail" style="display: none;z-index: 1000;">
                                                         <ul style="list-style: none;padding: 0;margin-bottom: 0;">
                                                             <%for(let j=i.MINSIZE;j<=i.MAXSIZE;j++){%>
                                                                 <li>
@@ -146,7 +147,7 @@
                                                         </ul>
                                                     </div>
                                                     <div class="ms-3 quantity-choice border-choice"
-                                                        style="max-height: 30px;">
+                                                        style="max-height: 30px;z-index: 700;">
                                                         Số lượng: <span style="margin-right: 3px;">
                                                             <%=i.SOLUONG%>
                                                         </span><i class="fa-solid fa-chevron-down"></i>
@@ -164,14 +165,18 @@
                                             </div>
                                         </div>
                                         <div class="col-4">
-                                            <h5 style="text-align: center;" id="price_<%=i.MASP%>_<%=i.SIZE%>" title="<%=i.GIA*i.SOLUONG%>">
+                                            <h5 style="text-align: center;" id="price_<%=i.MASP%>_<%=i.SIZE%>"
+                                                title="<%=i.GIA*i.SOLUONG%>">
                                                 <%=(i.GIA*i.SOLUONG).toLocaleString('vi', {style : 'currency' , currency
                                                     : 'VND' })%>
                                             </h5>
                                             <form action="/fermeh/cart/del-product" method="post">
-                                                <button class="btn btn-dark delete_btn" value="<%=i.MASP%>_<%=i.SIZE%>">Xóa</button>
-                                                <input type="text" style="display: none;" name="masp" value="<%=i.MASP%>">
-                                                <input type="text" style="display: none;" name="size" value="<%=i.SIZE%>">
+                                                <button class="btn btn-dark delete_btn"
+                                                    value="<%=i.MASP%>_<%=i.SIZE%>">Xóa</button>
+                                                <input type="text" style="display: none;" name="masp"
+                                                    value="<%=i.MASP%>">
+                                                <input type="text" style="display: none;" name="size"
+                                                    value="<%=i.SIZE%>">
                                             </form>
                                         </div>
                                     </div>
@@ -217,42 +222,44 @@
                         </div>
             </div>
             <%}%>
+                <script src="/public/jquery/jquery-3.6.0.min.js"></script>
+                <script src="/public/js/cart.js"></script>
                 <script>
-                    var list_delete_btn = document.querySelectorAll(".delete_btn")
-                    let size_choice = document.querySelectorAll(".size-choice")
-                    let quantity_choice = document.querySelectorAll(".quantity-choice")
-                    let size_detail = document.querySelectorAll(".size-detail")
-                    let quantity_detail = document.querySelectorAll(".quantity-detail")
-                    for (let i=0;i<size_choice.length;i++) {
-                        size_choice[i].onclick = () => {
-                            size_detail[i].classList.toggle("display-class")
-                        }
-                    }
-                    for (let i =0;i< quantity_choice.length;i++) {
-                        quantity_choice[i].onclick = () => {
-                            quantity_detail[i].classList.toggle("display-class")
-                        }
-                    }
-                    for (let i of list_delete_btn) {
-                        i.addEventListener("click", () => {
-                            document.cookie = `product_${i.value}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
-                            document.querySelector(`#product_${i.value}`).style.display = "none"
-                            let money = parseInt(document.querySelector(`#price_${i.value}`).title)
-                            let bf = document.querySelector("#price_before")
-                            let tt = document.querySelector("#price_total")
-                            let value_bf = (parseInt(bf.title) -  money)
-                            let value_tt = (parseInt(tt.title) -  money)
-                            bf.innerText = value_bf.toLocaleString('vi', {style : 'currency' ,
-                                            currency : 'VND' })
-                            tt.innerText = value_tt.toLocaleString('vi', {style : 'currency' ,
-                                            currency : 'VND' })
-                            bf.title = value_bf
-                            tt.title = value_tt
-                            if(parseInt(value_bf)===0){
-                                document.querySelector(".non-product").style.display="block"
-                            }
-                        })
-                    }
+                    // var list_delete_btn = document.querySelectorAll(".delete_btn")
+                    // let size_choice = document.querySelectorAll(".size-choice")
+                    // let quantity_choice = document.querySelectorAll(".quantity-choice")
+                    // let size_detail = document.querySelectorAll(".size-detail")
+                    // let quantity_detail = document.querySelectorAll(".quantity-detail")
+                    // for (let i=0;i<size_choice.length;i++) {
+                    //     size_choice[i].onclick = () => {
+                    //         size_detail[i].classList.toggle("display-class")
+                    //     }
+                    // }
+                    // for (let i =0;i< quantity_choice.length;i++) {
+                    //     quantity_choice[i].onclick = () => {
+                    //         quantity_detail[i].classList.toggle("display-class")
+                    //     }
+                    // }
+                    // for (let i of list_delete_btn) {
+                    //     i.addEventListener("click", () => {
+                    //         document.cookie = `product_${i.value}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+                    //         document.querySelector(`#product_${i.value}`).style.display = "none"
+                    //         let money = parseInt(document.querySelector(`#price_${i.value}`).title)
+                    //         let bf = document.querySelector("#price_before")
+                    //         let tt = document.querySelector("#price_total")
+                    //         let value_bf = (parseInt(bf.title) -  money)
+                    //         let value_tt = (parseInt(tt.title) -  money)
+                    //         bf.innerText = value_bf.toLocaleString('vi', {style : 'currency' ,
+                    //                         currency : 'VND' })
+                    //         tt.innerText = value_tt.toLocaleString('vi', {style : 'currency' ,
+                    //                         currency : 'VND' })
+                    //         bf.title = value_bf
+                    //         tt.title = value_tt
+                    //         if(parseInt(value_bf)===0){
+                    //             document.querySelector(".non-product").style.display="block"
+                    //         }
+                    //     })
+                    // }
         // document.querySelector("body").onclick=()=>{
         //     if(Array.from(document.querySelector(".quantity-detail").classList).includes("display-class")==true){
         //         document.querySelector(".quantity-detail").classList.remove("display-class")

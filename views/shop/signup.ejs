@@ -40,17 +40,19 @@
                 </div>
                 <div class="mb-3" style="margin-top: 25px;">
                     <input type="text" class="form-control" id="exampleInputEmail1" placeholder="Họ và tên" required
-                        name="name">
+                        name="name" value="<%=(typeof username != 'undefined' ? username : '')%>">
                 </div>
                 <div class="mb-3" style="margin-top: 25px;">
                     <input type="text" class="form-control" id="exampleInputEmail1" placeholder="Số điện thoại" required
-                        name="phoneNumber">
-                    <label for="" class="form-text" style="color: red;"></label>
+                        name="phoneNumber" value="<%=(typeof phone != 'undefined' ? phone : '')%>">
+                    <label for="" class=" form-text" style="color: red;"></label>
                 </div>
                 <div class="mb-3">
                     <input type="password" class="form-control" id="exampleInputPassword1" placeholder="Mật khẩu"
-                        required name="password">
-                        <label for="" class="form-text" style="color: red;"><%=message%></label>
+                        required name="password" value="<%=(typeof pass != 'undefined' ? pass : '')%>">
+                    <label for="" class="form-text" style="color: red;">
+                        <%=message%>
+                    </label>
                 </div>
                 <!-- <div class="mb-3 form-check">
                     <input type="checkbox" class="form-check-input" id="exampleCheck1">
