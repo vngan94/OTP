@@ -1,0 +1,140 @@
+<%-layout('layout/admin_layout')%>
+<main class="page-content">
+    <!--breadcrumb-->
+    <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
+      <div class="breadcrumb-title pe-3">FERMEH</div>
+      <div class="ps-3">
+      </div>
+      <div class="ms-auto">
+      </div>
+    </div>
+    <!--end breadcrumb-->
+
+      <div class="row">
+         <div class="col-12  d-flex">
+           <div class="card w-100">
+            <div class="card-header py-3">
+              <div class="row g-3">
+                <div class="col-lg-4 col-md-6 me-auto">
+                  <div class="ms-auto position-relative">
+                    <div class="position-absolute top-50 translate-middle-y search-icon px-3"><i class="bi bi-search"></i></div>
+                  </div>
+                </div>
+                <div class="col-lg-2 col-6 col-md-3">
+                  <select class="form-select">
+                    <option>Status</option>
+                    <option>Active</option>
+                    <option>Disabled</option>
+                    <option>Pending</option>
+                    <option>Show All</option>
+                  </select>
+                </div>
+                <div class="col-lg-2 col-6 col-md-3">
+                  <select class="form-select">
+                    <option>Show 10</option>
+                    <option>Show 30</option>
+                    <option>Show 50</option>
+                  </select>
+                </div>
+              </div>
+             </div>
+             <div class="card-body">
+               <div class="table-responsive">
+                 <table class="table align-middle">
+                   <thead class="table-light">
+                     <tr>
+                       <th>Mã hóa đơn</th>
+                       <th>Tên khách hàng</th>
+                       <th>Tổng thanh toán</th>
+                       <th>Ngày lập</th>
+                       <th>Phương thức</th>
+                       <th>Chi tiết</th>
+                     </tr>
+                   </thead>
+                   <tbody>
+                     <%for(let i of bill){%>
+                     <tr>
+                       <td>#<%=i.MAHD%></td>
+                       <%if(i.MAKH==null || i.MAKH==''){%>
+                          <td><%=i.TEN%></td>
+                       <%}else{%>
+                          <td><%=i.TENKH%></td>
+                       <%}%>
+                       <td title="<%=i.TONGTIEN%>"><%=i.TONGTIEN.toLocaleString('vi', {style : 'currency' , currency: 'VND' })%></td>
+                       <td><%=i.NGAYLAP.toLocaleDateString("en-US", { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })%></td>
+                       <td><%=i.PHUONGTHUC%></td>
+                       <td>
+                        <div class="d-flex align-items-center gap-3 fs-6">
+                          <form action="/fermeh/admin/detail-orders" method="get">
+                            <input type="text" name="infor_detail_bill" id="infor_detail_bill" style="display: none;" value="<%=i.MAHD%>">
+                            <button style="border:none;background: none;">
+                              <a href="" class="text-primary" data-bs-toggle="tooltip"  data-bs-original-title="Chi tiết" aria-label="Views">
+                                <i class="bi bi-eye-fill"></i>
+                              </a>
+                            </button>
+                          </form>
+                        </div>
+                       </td>
+                     </tr>
+                     <%}%>
+                   </tbody>
+                 </table>
+               </div>
+               <nav class="float-end" aria-label="Page navigation">
+                <ul class="pagination">
+                  <li class="page-item disabled"><a class="page-link" href="#">Previous</a></li>
+                  <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                  <li class="page-item"><a class="page-link" href="#">2</a></li>
+                  <li class="page-item"><a class="page-link" href="#">3</a></li>
+                  <li class="page-item"><a class="page-link" href="#">Next</a></li>
+                </ul>
+              </nav>
+             </div>
+           </div>
+         </div>
+         <!-- <div class="col-12 col-lg-3 d-flex">
+          <div class="card w-100">
+            <div class="card-header py-3">
+              <h5 class="mb-0">Filter by</h5>
+            </div>
+            <div class="card-body">
+              <form class="row g-3">
+                <div class="col-12">
+                  <label class="form-label">Order ID</label>
+                  <input type="text" class="form-control" placeholder="Order ID">
+                </div>
+                <div class="col-12">
+                 <label class="form-label">Customer</label>
+                 <input type="text" class="form-control" placeholder="Customer name">
+               </div>
+               <div class="col-12">
+                 <label class="form-label">Order Status</label>
+                 <select class="form-select">
+                   <option>Published</option>
+                   <option>Draft</option>
+                 </select> 
+               </div>
+               <div class="col-12">
+                <label class="form-label">Total</label>
+                <input type="text" class="form-control">
+               </div>
+               <div class="col-12">
+                <label class="form-label">Date Added</label>
+                <input type="date" class="form-control">
+               </div>
+               <div class="col-12">
+                <label class="form-label">Date Modified</label>
+                <input type="date" class="form-control">
+               </div>
+               <div class="col-12">
+                 <div class="d-grid">
+                   <button class="btn btn-primary">Filter Product</button>
+                 </div>
+               </div>
+              </form>
+            </div>
+          </div>
+        </div> -->
+      </div><!--end row-->
+
+  </main>

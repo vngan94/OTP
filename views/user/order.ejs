@@ -43,10 +43,12 @@
     <div class="row list-items mb-4 mt-4" style="padding: 15px 0;background-color: #fff;">
         <h5 style="font-weight: 700;margin: 0;text-transform: uppercase;">Đơn hàng</h5>
     </div>
+    <%for(let i of arr){let tong=0;let diachi=''%>
     <div class="row mt-4 contain-order">
+        <%for(let j of i){tong+=j.GIA*j.SL;diachi=j.DIACHI;%>
         <div class="d-flex contain-product" style="background-color: #fff;padding: 15px 12px;">
             <div class="product-img">
-                <img src="/public/img/product/1.jpg" alt="product" class="img-fluid"
+                <img src="/public/img/product/<%=j.IDHA%>_1.jpg" alt="product" class="img-fluid"
                     style="width: 100%;height: 100%;">
             </div>
             <div style="width: 100%;">
@@ -54,21 +56,21 @@
                     <div class="col-8" style="position: relative;">
                         <div class="ps-3">
                             <h3>
-                                1
+                                <%=j.TENSP%>
                             </h3>
                             <p style="font-size: 18px;">
-                                1
+                                <%=j.CTLOAI%>
                             </p>
                             <div class="d-flex" style="margin-top: 25px;">
                                 <div class="size-choice border-choice">
                                     Size: <span style="margin-right: 3px;">
-                                        1
+                                        <%=j.SIZE%>
 
                                 </div>
 
                                 <div class="ms-3 quantity-choice border-choice">
                                     Số lượng: <span style="margin-right: 3px;">
-                                        1
+                                        <%=j.SL%>
                                     </span>
                                 </div>
 
@@ -77,102 +79,27 @@
                     </div>
                     <div class="col-4 d-flex" style="align-items: center;justify-content: right;">
                         <h5 style="text-align: center;color: #ff3d00;font-size: 25px;font-weight: 700;padding: 0 30px;" id="" title="">
-                           10000000d
+                           <%=parseInt(j.GIA)*parseInt(j.SL)%>
                         </h5>
                     </div>
                 </div>
             </div>
         </div>
+        <%}%>
         <!--  -->
-        <div class="d-flex contain-product" style="background-color: #fff;padding: 15px 12px;">
-            <div class="product-img">
-                <img src="/public/img/product/1.jpg" alt="product" class="img-fluid"
-                    style="width: 100%;height: 100%;">
-            </div>
-            <div style="width: 100%;">
-                <div class="row">
-                    <div class="col-8" style="position: relative;">
-                        <div class="ps-3">
-                            <h3>
-                                1
-                            </h3>
-                            <p style="font-size: 18px;">
-                                1
-                            </p>
-                            <div class="d-flex" style="margin-top: 25px;">
-                                <div class="size-choice border-choice">
-                                    Size: <span style="margin-right: 3px;">
-                                        1
-
-                                </div>
-
-                                <div class="ms-3 quantity-choice border-choice">
-                                    Số lượng: <span style="margin-right: 3px;">
-                                        1
-                                    </span>
-                                </div>
-
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-4 d-flex" style="align-items: center;justify-content: right;">
-                        <h5 style="text-align: center;color: #ff3d00;font-size: 25px;font-weight: 700;padding: 0 30px;" id="" title="">
-                           10000000d
-                        </h5>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="d-flex" style="align-items: center;justify-content: right;background-color: #fff;padding: 15px 15px;">
+      
+        <div class="d-flex" style="align-items: center;justify-content: space-between;background-color: #fff;padding: 15px 15px;">
+            <span style="padding: 0 15px;font-size: 18px;">
+               <h6>Địa chỉ: </h6> <%=diachi%>
+            </span>
             <span style="padding: 0 15px;font-size: 18px;">
                 <i class="fa-solid fa-coins"></i>
                 Tổng số tiền:   
+                <h5 style="text-align: center;color: #ff3d00;font-size: 25px;font-weight: 700;padding: 0 10px;display: inline-block;" id="" title="">
+                    <%=tong%>
+                 </h5>
             </span>
-            <h5 style="text-align: center;color: #ff3d00;font-size: 25px;font-weight: 700;padding: 0 30px;" id="" title="">
-                10000000d
-             </h5>
         </div>
     </div>
-    <div class="row mt-4 contain-order">
-        <div class="d-flex contain-product" style="background-color: #fff;padding: 15px 12px;">
-            <div class="product-img">
-                <img src="/public/img/product/1.jpg" alt="product" class="img-fluid"
-                    style="width: 100%;height: 100%;">
-            </div>
-            <div style="width: 100%;">
-                <div class="row">
-                    <div class="col-8" style="position: relative;">
-                        <div class="ps-3">
-                            <h3>
-                                1
-                            </h3>
-                            <p style="font-size: 18px;">
-                                1
-                            </p>
-                            <div class="d-flex" style="margin-top: 25px;">
-                                <div class="size-choice border-choice">
-                                    Size: <span style="margin-right: 3px;">
-                                        1
-
-                                </div>
-
-                                <div class="ms-3 quantity-choice border-choice">
-                                    Số lượng: <span style="margin-right: 3px;">
-                                        1
-                                    </span>
-                                </div>
-
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-4 d-flex" style="align-items: center;justify-content: right;">
-                        <h5 style="text-align: center;color: #ff3d00;font-size: 25px;font-weight: 700;padding: 0 30px;" id="" title="">
-                           10000000d
-                        </h5>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!--  -->
-    </div>
+    <%}%>
 </div>

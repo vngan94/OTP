@@ -1,0 +1,237 @@
+<%-layout('layout/admin_layout')%>
+<main class="page-content">
+    <!--breadcrumb-->
+    <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
+      <div class="breadcrumb-title pe-3">Chi tiết đơn hàng</div>
+      <div class="ps-3">
+        <nav aria-label="breadcrumb">
+          
+        </nav>
+      </div>
+      <div class="ms-auto">
+        
+      </div>
+    </div>
+    <!--end breadcrumb-->
+    <%if(bill.length !=0 && detail.length !=0){%>
+      <div class="card">
+        <div class="card-header py-3"> 
+          <div class="row g-3 align-items-center">
+            <div class="col-12 col-lg-4 col-md-6 me-auto">
+              <h5 class="mb-1"><%=bill[0].NGAYLAP.toLocaleDateString("en-US",{ weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })%></h5>
+              <p class="mb-0">#<%=bill[0].MAHD%></p>
+            </div>
+            <!-- <div class="col-12 col-lg-3 col-6 col-md-3">
+              <select class="form-select">
+                <option>Change Status</option>
+                <option>Awaiting Payment</option>
+                <option>Confirmed</option>
+                <option>Shipped</option>
+                <option>Delivered</option>
+              </select>
+            </div> -->
+            <div class="col-12 col-lg-3 col-6 col-md-3">
+               <button type="button" class="btn btn-primary">Lưu</button>
+               <button type="button" class="btn btn-secondary"><i class="bi bi-printer-fill"></i> In</button>
+            </div>
+          </div>
+         </div>
+        <div class="card-body">
+            <div class="row row-cols-1 row-cols-xl-2 row-cols-xxl-3">
+               <div class="col">
+                 <div class="card border shadow-none radius-10">
+                   <div class="card-body">
+                    <div class="d-flex align-items-center gap-3">
+                      <div class="icon-box bg-light-primary border-0">
+                        <i class="bi bi-person text-primary"></i>
+                      </div>
+                      <div class="info">
+                         <h6 class="mb-2">Khách hàng</h6>
+                         <%if(bill[0].MAKH==null || bill[0].MAKH==''){%>
+                          <p class="mb-1"><%=bill[0].TEN%></p>
+                          <p class="mb-1"><%=bill[0].EMAIL%></p>
+                          <p class="mb-1"><%=bill[0].SDT%></p>
+                         <%}else{%>
+                          <p class="mb-1"><%=bill[0].TENKH%></p>
+                          <p class="mb-1"><%=bill[0].EMAILKH%></p>
+                          <p class="mb-1"><%=bill[0].SDTKH%></p>
+                         <%}%>
+                      </div>
+                   </div>
+                   </div>
+                 </div>
+               </div>
+               <div class="col">
+                <div class="card border shadow-none radius-10">
+                  <div class="card-body">
+                    <div class="d-flex align-items-center gap-3">
+                      <div class="icon-box bg-light-success border-0">
+                        <i class="bi bi-truck text-success"></i>
+                      </div>
+                      <div class="info">
+                         <h6 class="mb-2">Thông tin đơn hàng</h6>
+                         <p class="mb-1"><strong>Vận chuyển</strong> : Red Express</p>
+                         <p class="mb-1"><strong>Phương thức thanh toán</strong> : <%=bill[0].PHUONGTHUC%></p>
+                         <p class="mb-1"><strong>Loại</strong> : Mới</p>
+                      </div>
+                   </div>
+                   </div>
+                  </div>
+               </div>
+              <div class="col">
+                <div class="card border shadow-none radius-10">
+                  <div class="card-body">
+                    <div class="d-flex align-items-center gap-3">
+                      <div class="icon-box bg-light-danger border-0">
+                        <i class="bi bi-geo-alt text-danger"></i>
+                      </div>
+                      <div class="info">
+                        <h6 class="mb-2">Địa chỉ giao hàng</h6>
+                        <p class="mb-1"><strong>Thành Phố</strong>: </p>
+                        <p class="mb-1"><strong>Địa chỉ</strong> : <%=bill[0].DIACHI%></p>
+                      </div>
+                    </div>
+                  </div>
+                 </div>
+            </div>
+          </div><!--end row-->
+
+          <div class="row">
+              <div class="col-12 col-lg-8">
+                 <div class="card border shadow-none radius-10">
+                   <div class="card-body">
+                       <div class="table-responsive">
+                         <table class="table align-middle mb-0">
+                           <thead class="table-light">
+                             <tr>
+                               <th>Sản phẩm</th>
+                               <th>Giá bán lẻ</th>
+                               <th>Số lượng</th>
+                               <th>Tổng cộng</th>
+                             </tr>
+                           </thead>
+                           <tbody>
+                             <%for(let i of detail){%> 
+                              <tr>
+                                <td>
+                                  <div class="orderlist">
+                                   <a class="d-flex align-items-center gap-2" href="javascript:;">
+                                     <div class="product-box">
+                                         <img src="/public/img/product/<%=i.IDHA%>_1.jpg" alt="">
+                                     </div>
+                                     <div>
+                                         <P class="mb-0 product-title"><%=i.TENSP%></P>
+                                     </div>
+                                    </a>
+                                  </div>
+                                </td>
+                                <td><%=i.GIA.toLocaleString('vi', {style : 'currency' , currency: 'VND' })%></td>
+                                <td><%=i.SL%></td>
+                                <td><%=i.tong.toLocaleString('vi', {style : 'currency' , currency: 'VND' })%></td>
+                              </tr>
+                             <%}%>
+                           </tbody>
+                         </table>
+                       </div>
+                   </div>
+                 </div>
+              </div>
+              <div class="col-12 col-lg-4">
+                <div class="card border shadow-none bg-light radius-10">
+                  <div class="card-body">
+                      <div class="d-flex align-items-center mb-4">
+                         <div>
+                            <h5 class="mb-0">Đơn giá</h5>
+                         </div>
+                         <div class="ms-auto">
+                           <button type="button" class="btn alert-success radius-30 px-4">Xác nhận</button>
+                        </div>
+                      </div>
+                        <div class="d-flex align-items-center mb-3">
+                          <div>
+                            <p class="mb-0">Tổng cộng</p>
+                          </div>
+                          <div class="ms-auto">
+                            <h5 class="mb-0" title="<%=bill[0].TONGTIEN%>"><%=bill[0].TONGTIEN.toLocaleString('vi', {style : 'currency' , currency: 'VND' })%></h5>
+                        </div>
+                      </div>
+                      <div class="d-flex align-items-center mb-3">
+                        <div>
+                          <p class="mb-0">Phí giao hàng</p>
+                        </div>
+                        <div class="ms-auto">
+                          <h5 class="mb-0"><%=parseInt(30000).toLocaleString('vi', {style : 'currency' , currency: 'VND' })%></h5>
+                      </div>
+                    <!-- <div class="d-flex align-items-center mb-3">
+                      <div>
+                        <p class="mb-0">Payment Fee</p>
+                      </div>
+                      <div class="ms-auto">
+                        <h5 class="mb-0">$14.00</h5>
+                    </div> -->
+                  </div>
+                    <div class="d-flex align-items-center mb-3">
+                      
+                  </div>
+                  </div>
+                </div>
+                <%if(bill[0].PHUONGTHUC=='momo'){%>
+                <div class="card border shadow-none bg-warning radius-10">
+                  <div class="card-body">
+                      <h5>Payment info</h5>
+                       <div class="d-flex align-items-center gap-3">
+                          <div class="fs-1">
+                            <i class="bi bi-credit-card-2-back-fill"></i>
+                          </div>
+                          <div class="">
+                            <p class="mb-0 fs-6">Master Card **** **** 8956 </p>
+                          </div>
+                       </div>
+                      <p>Business name: Template Market LLP <br>
+                         Phone: +91-9910XXXXXX
+                      </p>
+                  </div>
+                </div>
+                <%}%>
+
+             </div>
+             <div class="row">
+              <div class="col-6">
+               <form action="/fermeh/admin/detail-orders" method="get">
+                 <label for="infor_detail_bill" class="form-label">Nhập mã hóa đơn</label>
+                 <input type="text" class="form-control" name="infor_detail_bill" id="infor_detail_bill" placeholder="Nhập mã hóa đơn">
+                 <div class="mt-2"><button type="submit" class="btn btn-dark">Tìm hóa đơn</button></div>
+               </form>
+              </div>
+            </div>
+          </div><!--end row-->
+
+        </div>
+      </div>
+      <%}else{%>
+        <div class="card-header py-3"> 
+          <div class="row g-3 align-items-center">
+            <div class="col-12 col-lg-4 col-md-6 me-auto">
+              <h5 class="mb-1"><%=(new Date()).toLocaleDateString("en-US",{ weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })%></h5>
+              <p class="mb-0"></p>
+            </div>
+            <div class="col-12 col-lg-3 col-6 col-md-3">
+               <button type="button" class="btn btn-primary">Lưu</button>
+               <button type="button" class="btn btn-secondary"><i class="bi bi-printer-fill"></i> In</button>
+            </div>
+          </div>
+         </div>
+         <div class="card-body">
+           <div class="row">
+             <div class="col-2"></div>
+             <div class="col-6">
+              <form action="/fermeh/admin/detail-orders" method="get">
+                <label for="infor_detail_bill" class="form-label">Nhập mã hóa đơn</label>
+                <input type="text" class="form-control" name="infor_detail_bill" id="infor_detail_bill" placeholder="Nhập mã hóa đơn">
+                <div class="mt-2"><button type="submit" class="btn btn-dark">Tìm hóa đơn</button></div>
+              </form>
+             </div>
+           </div>
+         </div>
+      <%}%>
+  </main>
