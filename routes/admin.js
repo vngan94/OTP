@@ -1,27 +1,30 @@
 const express = require('express')
 const route = express.Router()
 const CatchAsync = require('../model/error/CatchAsync')
-const { conn, sql } = require('../model/sqlserver')
+const { conn, sql } = require('../model/sqlServerStaff')
 const axios = require('axios');
 const { response } = require('express');
+const cookieParser = require('cookie-parser');
+route.use(cookieParser())
 var tknv = 'NV01'
 //hiện role đang sửa thành 2 cho dễ render các page
 var role = 2
+var tentk = ''
 //mặc định band đầu là 0
 
 route.get('/fermeh/admin-site', async (req, res) => {
-    if (role === 0) {
+    if (req.cookies.role == '' || typeof (req.cookies.role) == 'undefined') {
         res.redirect('http://localhost:3000/fermeh/admin/login')
     }
     else {
         let pool = await conn
         let sqlDH = `select DONHANG = (select count(*) from HOADON),TONG=(select sum(TONGTIEN) 
         from HOADON),KH=(select count(*) from KHACHHANG),TONGTODAY =   
-        (select sum(TONGTIEN) from HOADON where NGAYLAP=GETDATE()),TONGSOSP=(select COUNT(*) from LOAISANPHAM)        `
+        (select sum(TONGTIEN) from HOADON where NGAYLAP=FORMAT (getdate(), 'yyyy-MM-dd')),TONGSOSP=(select COUNT(*) from LOAISANPHAM)        `
         let sqlTOPDM = `select CTLOAI,SL=count(*) from LOAISANPHAM group by CTLOAI order by CTLOAI desc`
         let sqlHDMOI = `select top 7 MAKH,MAHD,NGAYLAP,TONGTIEN,TEN,TENKH=
         (select TENKH from KHACHHANG where KHACHHANG.MAKH=HOADON.MAKH),
-        SOSP=(select count(*) from CTHD where CTHD.MAHD=HOADON.MAHD) from HOADON`
+        SOSP=(select count(*) from CTHD where CTHD.MAHD=HOADON.MAHD) from HOADON order by NGAYLAP desc`
         let sqlTOPSELLER = `exec admin_topseller`
         await pool.request().query(sqlDH, async (err, data) => {
             var topdh = data.recordset
@@ -31,7 +34,7 @@ route.get('/fermeh/admin-site', async (req, res) => {
                     var topdm = data.recordset
                     await pool.request().query(sqlTOPSELLER, async (err, data) => {
                         var topsell = data.recordset
-                        res.render('admin/index', { title: "Trang chủ", topsell: topsell, topdm: topdm, topdh: topdh, hdmoi: hdmoi })
+                        res.render('admin/index', { title: "Trang chủ", topsell: topsell, topdm: topdm, topdh: topdh, hdmoi: hdmoi, tentk: req.cookies.tentk })
                     })
                 })
             })
@@ -41,6 +44,12 @@ route.get('/fermeh/admin-site', async (req, res) => {
 
 //xu lý đăng nhập, đăng xuất
 route.get('/fermeh/admin/login', async (req, res) => {
+    console.log(req.cookies.role)
+    if (typeof (req.cookies.role) === 'undefined') {
+        res.cookie('role', '')
+        res.cookie('tknv', '')
+        res.cookie('tentk', '')
+    }
     res.render('admin/login', { title: "Đăng nhập" })
 })
 
@@ -66,6 +75,11 @@ route.post('/fermeh/admin/login', CatchAsync(async (req, res) => {
             } else {
                 if (data.recordset[0].MATKHAU == cipherPass) {
                     role = parseInt(data.recordset[0].MAROLE);
+                    tknv = data.recordset[0].MANV
+                    tentk = data.recordset[0].TEN
+                    await res.cookie('role', parseInt(data.recordset[0].MAROLE))
+                    await res.cookie('tknv', data.recordset[0].MANV)
+                    await res.cookie('tentk', data.recordset[0].TEN)
                     res.redirect('http://localhost:3000/fermeh/admin-site')
                 } else {
                     res.render('admin/login', { error: "Tài khoản hoặc mật khẩu không chính xác!", title: "Đăng nhập" })
@@ -80,17 +94,21 @@ route.post('/fermeh/admin/login', CatchAsync(async (req, res) => {
 route.get('/fermeh/admin/log-out', async (req, res) => {
     role = 0;
     tknv = ''
+    tentk = ''
+    res.cookie('role', '')
+    res.cookie('tknv', '')
+    res.cookie('tentk', '')
     res.redirect('http://localhost:3000/fermeh/admin/login')
 })
 //xu lý đăng nhập, đăng xuất
 //---------------------------XỬ LÝ THÊM NHÂN VIÊN, XEM DANH SÁCH NHÂN VIÊN
 route.get('/fermeh/admin/add-new-staff', async (req, res) => {
-    // if (role === 0) {
-    //     res.redirect('http://localhost:3000/fermeh/admin/login')
-    // }
-    // else {
-    res.render('admin/add_new_staff', { title: "Thêm nhân viên mới", infor: {} })
-    // }
+    if (req.cookies.role == '' || typeof (req.cookies.role) == 'undefined') {
+        res.redirect('http://localhost:3000/fermeh/admin/login')
+    }
+    else {
+        res.render('admin/add_new_staff', { title: "Thêm nhân viên mới", infor: {}, tentk: req.body.tentk })
+    }
 })
 route.post('/fermeh/admin/add-new-staff', CatchAsync(async (req, res) => {
     let pool = await conn
@@ -109,27 +127,27 @@ route.post('/fermeh/admin/add-new-staff', CatchAsync(async (req, res) => {
                                         res.redirect('http://localhost:3000/fermeh/admin/list-staff')
                                     })
                                 } else {
-                                    res.render('admin/add_new_staff', { title: 'Thêm nhân viên mới', error: 'Số CMND/CCCD đã tồn tại', infor: req.body })
+                                    res.render('admin/add_new_staff', { title: 'Thêm nhân viên mới', error: 'Số CMND/CCCD đã tồn tại', infor: req.body, tentk: req.cookies.tentk })
                                 }
                             })
 
                         } else {
-                            res.render('admin/add_new_staff', { title: 'Thêm nhân viên mới', error: 'Tên tài khoản đã tồn tại', infor: req.body })
+                            res.render('admin/add_new_staff', { title: 'Thêm nhân viên mới', error: 'Tên tài khoản đã tồn tại', infor: req.body, tentk: req.cookies.tentk })
                         }
                     })
                 } else {
-                    res.render('admin/add_new_staff', { title: 'Thêm nhân viên mới', error: 'Số điện thoại đã tồn tại', infor: req.body })
+                    res.render('admin/add_new_staff', { title: 'Thêm nhân viên mới', error: 'Số điện thoại đã tồn tại', infor: req.body, tentk: req.cookies.tentk })
                 }
             })
         } else {
-            res.render('admin/add_new_staff', { title: 'Thêm nhân viên mới', error: 'Mã nhân viên đã tồn tại', infor: req.body })
+            res.render('admin/add_new_staff', { title: 'Thêm nhân viên mới', error: 'Mã nhân viên đã tồn tại', infor: req.body, tentk: req.cookies.tentk })
         }
     })
 }))
 //---------------------------XỬ LÝ THÊM NHÂN VIÊN, XEM DANH SÁCH NHÂN VIÊN
 //---------------------------DANH SÁCH NHÂN VIÊN
 route.get('/fermeh/admin/list-staff', async (req, res) => {
-    if (role === 0) {
+    if (req.cookies.role == '' || typeof (req.cookies.role) == 'undefined') {
         res.redirect('http://localhost:3000/fermeh/admin/login')
     }
     else {
@@ -137,24 +155,25 @@ route.get('/fermeh/admin/list-staff', async (req, res) => {
         let sql = 'select * from NHANVIEN where NGHIVIEC=0'
         await pool.request().query(sql, async (err, data) => {
             //console.log(data.recordset)
-            res.render('admin/list_staff', { title: "Danh sách nhân viên", staff: data.recordset })
+            res.render('admin/list_staff', { title: "Danh sách nhân viên", staff: data.recordset, tentk: req.cookies.tentk })
         })
     }
 })
 
 route.post('/fermeh/admin/delete-staff', CatchAsync(async (req, res) => {
-    if (role === 0) {
+    if (req.cookies.role == '' || typeof (req.cookies.role) == 'undefined') {
         res.redirect('http://localhost:3000/fermeh/admin/login')
     }
     else {
         let pool = await conn
-        await pool.request().query(`update NHANVIEN set NGHIVIEC=1 where MANV='${req.body.manv}'`, async (err, data) => {
+        await pool.request().query(`update NHANVIEN set NGHIVIEC=1 where MANV='${req.body.manv} '
+         update TAIKHOAN_NV set XOATAIKHOAN=1 where MANV='${req.body.manv}'`, async (err, data) => {
             console.log('thanh cong ajax')
         })
     }
 }))
 route.post('/fermeh/admin/list-product/edit-staff', CatchAsync(async (req, res) => {
-    if (role === 0) {
+    if (req.cookies.role == '' || typeof (req.cookies.role) == 'undefined') {
         res.redirect('http://localhost:3000/fermeh/admin/login')
     }
     else {
@@ -175,14 +194,14 @@ route.post('/fermeh/admin/list-product/edit-staff', CatchAsync(async (req, res) 
                 } else {
                     k[0].NGAYSINH = k[0].NGAYSINH.getFullYear() + '-' + (k[0].NGAYSINH.getMonth() + 1) + '-' + k[0].NGAYSINH.getDate()
                 }
-                res.render('admin/edit_infor_staff', { title: "Chỉnh sửa thông tin nhân viên", staff: k, role: role })
+                res.render('admin/edit_infor_staff', { title: "Chỉnh sửa thông tin nhân viên", staff: k, role: role, tentk: req.cookies.tentk })
             })
         })
 
     }
 }))
 route.post('/fermeh/admin/edit-infor-staff', CatchAsync(async (req, res) => {
-    if (role === 0) {
+    if (req.cookies.role == '' || typeof (req.cookies.role) == 'undefined') {
         res.redirect('http://localhost:3000/fermeh/admin/login')
     } else {
         if (typeof (req.body.staffstopwork) != 'undefined') req.body.staffstopwork = 1
@@ -194,6 +213,11 @@ route.post('/fermeh/admin/edit-infor-staff', CatchAsync(async (req, res) => {
             , async (err, data) => {
                 console.log('update thanh cong')
             })
+        if (rq.staffstopwork == 1) {
+            await pool.request().query(`update TAIKHOAN_NV set XOATAIKHOAN=1 where MANV='${rq.staffcode.trim()}'`, async (err, data) => {
+
+            })
+        }
         // console.log(req.body)
         res.redirect('http://localhost:3000/fermeh/admin/list-staff')
     }
@@ -201,7 +225,7 @@ route.post('/fermeh/admin/edit-infor-staff', CatchAsync(async (req, res) => {
 //---------------------------DANH SÁCH NHÂN VIÊN
 //---------------------------MODULE SẢN PHẨM
 route.get('/fermeh/admin/list-product', async (req, res) => {
-    if (role === 0) {
+    if (req.cookies.role == '' || typeof (req.cookies.role) == 'undefined') {
         res.redirect('http://localhost:3000/fermeh/admin/login')
     }
     else {
@@ -209,17 +233,17 @@ route.get('/fermeh/admin/list-product', async (req, res) => {
         pool.request().query(`select LOAISANPHAM.*,TENHANG=(SELECT TENHANG FROM HANGSX WHERE HANGSX.MAHANG=LOAISANPHAM.HANGSX) 
         from LOAISANPHAM where STILLSALE=1`, async (err, data) => {
             if (data.recordset.length > 0) {
-                res.render('admin/list_product', { title: "Danh sách sản phẩm", product: data.recordset })
+                res.render('admin/list_product', { title: "Danh sách sản phẩm", product: data.recordset, tentk: req.cookies.tentk })
             }
             else {
-                res.render('admin/list_product', { title: "Danh sách sản phẩm", product: [] })
+                res.render('admin/list_product', { title: "Danh sách sản phẩm", product: [], tentk: req.cookies.tentk })
             }
         })
     }
 })
 //
 route.post('/fermeh/admin/list-product/edit-product', async (req, res) => {
-    if (role === 0) {
+    if (req.cookies.role == '' || typeof (req.cookies.role) == 'undefined') {
         res.redirect('http://localhost:3000/fermeh/admin/login')
     }
     else {
@@ -237,14 +261,14 @@ route.post('/fermeh/admin/list-product/edit-product', async (req, res) => {
             }
             // console.log(k)
             await pool.request().query(`select * from HANGSX`, async (err, data) => {
-                res.render('admin/edit_infor_product', { title: "Chỉnh sửa thông tin sản phẩm", product: k, brand: data.recordset })
+                res.render('admin/edit_infor_product', { title: "Chỉnh sửa thông tin sản phẩm", product: k, brand: data.recordset, tentk: req.cookies.tentk })
             })
         })
     }
 })
 
 route.post('/fermeh/admin/list-product/del-product', async (req, res) => {
-    if (role === 0) {
+    if (req.cookies.role == '' || typeof (req.cookies.role) == 'undefined') {
         res.redirect('http://localhost:3000/fermeh/admin/login')
     }
     else {
@@ -253,7 +277,7 @@ route.post('/fermeh/admin/list-product/del-product', async (req, res) => {
     }
 })
 route.post('/fermeh/admin/edit-product', async (req, res) => {
-    if (role === 0) {
+    if (req.cookies.role == '' || typeof (req.cookies.role) == 'undefined') {
         res.redirect('http://localhost:3000/fermeh/admin/login')
     }
     else {
@@ -270,22 +294,22 @@ route.post('/fermeh/admin/edit-product', async (req, res) => {
 })
 //
 route.get('/fermeh/admin/add-new-product', async (req, res) => {
-    if (role === 0) {
+    if (req.cookies.role == '' || typeof (req.cookies.role) == 'undefined') {
         res.redirect('http://localhost:3000/fermeh/admin/login')
     }
     else {
         let pool = await conn
         await pool.request().query(`select * from HANGSX`, async (err, data) => {
             if (data.recordset.length > 0) {
-                res.render('admin/add_new_product', { title: "Thêm sản phẩm mới", brand: data.recordset })
+                res.render('admin/add_new_product', { title: "Thêm sản phẩm mới", brand: data.recordset, tentk: req.cookies.tentk })
             } else {
-                res.render('admin/add_new_product', { title: "Thêm sản phẩm mới", brand: [] })
+                res.render('admin/add_new_product', { title: "Thêm sản phẩm mới", brand: [], tentk: req.cookies.tentk })
             }
         })
     }
 })
 route.post('/fermeh/admin/add-new-product', async (req, res) => {
-    if (role === 0) {
+    if (req.cookies.role == '' || typeof (req.cookies.role) == 'undefined') {
         res.redirect('http://localhost:3000/fermeh/admin/login')
     }
     else {
@@ -301,23 +325,38 @@ route.post('/fermeh/admin/add-new-product', async (req, res) => {
 })
 //--------------------------KHO
 route.get('/fermeh/admin/product-category', CatchAsync(async (req, res) => {
-    if (role === 0) {
+    if (req.cookies.role == '' || typeof (req.cookies.role) == 'undefined') {
         res.redirect('http://localhost:3000/fermeh/admin/login')
     }
     else {
         let pool = await conn
         await pool.request().query('exec admin_renderKho', async (err, data) => {
             if (data.recordset.length > 0) {
-                res.render('admin/product_category', { title: "Loại sản phẩm", product: data.recordset })
+                res.render('admin/product_category', { title: "Kho sản phẩm", product: data.recordset, tentk: req.cookies.tentk })
             } else {
-                res.render('admin/product_category', { title: "Loại sản phẩm", product: [] })
+                res.render('admin/product_category', { title: "Kho sản phẩm", product: [], tentk: req.cookies.tentk })
             }
+        })
+    }
+}))
+
+route.post('/fermeh/admin/product-category/detail', CatchAsync(async (req, res) => {
+    if (req.cookies.role == '' || typeof (req.cookies.role) == 'undefined') {
+        res.redirect('http://localhost:3000/fermeh/admin/login')
+    }
+    else {
+        console.log(req.body)
+        var masp = parseInt(req.body.masp)
+        let pool = await conn
+        await pool.request().query(`select MASP,SIZE,SL=count(*) from SANPHAM where MASP=${masp} and SOLD=0 group by MASP,SIZE order by SIZE`, async (err, data) => {
+            console.log(data.recordset)
+            res.send({ sp: data.recordset })
         })
     }
 }))
 // nhap san pham vao kho
 route.get('/fermeh/admin/import-product', CatchAsync(async (req, res) => {
-    if (role === 0) {
+    if (req.cookies.role == '' || typeof (req.cookies.role) == 'undefined') {
         res.redirect('http://localhost:3000/fermeh/admin/login')
     }
     else {
@@ -329,7 +368,38 @@ route.get('/fermeh/admin/import-product', CatchAsync(async (req, res) => {
         //         res.render('admin/product_category', { title: "Loại sản phẩm", product: [] })
         //     }
         // })
-        res.render('admin/import_product', { title: "Nhập kho" })
+        res.render('admin/import_product', { title: "Nhập kho", tentk: req.cookies.tentk, pro: [], kho: [] })
+    }
+}))
+route.post('/fermeh/admin/import-product', CatchAsync(async (req, res) => {
+    if (req.cookies.role == '' || typeof (req.cookies.role) == 'undefined') {
+        res.redirect('http://localhost:3000/fermeh/admin/login')
+    }
+    else {
+        var masp = parseInt(req.body.productcode)
+        let pool = await conn
+        await pool.request().query(`select * from LOAISANPHAM where MASP=${masp}`, async (err, data) => {
+            var pro = data.recordset
+            await pool.request().query(`select MASP,SIZE,SL=count(*) from SANPHAM where MASP=${masp} and SOLD=0 group by MASP,SIZE order by SIZE`, async (err, data) => {
+                res.render('admin/import_product', { title: "Nhập kho", tentk: req.cookies.tentk, pro: pro, kho: data.recordset })
+            })
+        })
+    }
+}))
+route.post('/fermeh/admin/import-product/add', CatchAsync(async (req, res) => {
+    if (req.cookies.role == '' || typeof (req.cookies.role) == 'undefined') {
+        res.redirect('http://localhost:3000/fermeh/admin/login')
+    }
+    else {
+        var code = parseInt(req.body.productcode)
+        var size = parseInt(req.body.productsize)
+        var num = parseInt(req.body.productnumber)
+        let pool = await conn
+        for (let i = 0; i < num; i++) {
+            await pool.request().query(`insert into SANPHAM(MASP,SOLD,SIZE) values(${code},1,${size})`, async (err, data) => {
+            })
+        }
+        res.redirect('http://localhost:3000/fermeh/admin/import-product')
     }
 }))
 //thay doi gia san pham
@@ -339,18 +409,18 @@ route.get('/fermeh/admin/change-product-price', CatchAsync(async (req, res) => {
         await pool.request().query(`select * from LOAISANPHAM where MASP='${req.query.price_masp}'`, async (err, data) => {
             var pro = data.recordset
             await pool.request().query(`select * from THAYDOIGIA where MASP=${req.query.price_masp}`, async (err, data) => {
-                res.render('admin/change_product_price', { title: "Thay đổi giá sản phẩm", pro: pro, price: data.recordset })
+                res.render('admin/change_product_price', { title: "Thay đổi giá sản phẩm", pro: pro, price: data.recordset, tentk: req.cookies.tentk })
             })
 
         })
-    } else if (role === 0) {
+    } else if (req.cookies.role == '' || typeof (req.cookies.role) == 'undefined') {
         res.redirect('http://localhost:3000/fermeh/admin/login')
     } else {
         res.redirect('http://localhost:3000/fermeh/admin-site')
     }
 }))
 route.post('/fermeh/admin/change-product-price/change', async (req, res) => {
-    if (role === 0) {
+    if (req.cookies.role == '' || typeof (req.cookies.role) == 'undefined') {
         res.redirect('http://localhost:3000/fermeh/admin/login')
     }
     else {
@@ -388,7 +458,7 @@ route.post('/fermeh/admin/change-product-price/change', async (req, res) => {
 
 //----------------------------MODULE HÓA ĐƠN
 route.get('/fermeh/admin/orders', CatchAsync(async (req, res) => {
-    if (role === 0) {
+    if (req.cookies.role == '' || typeof (req.cookies.role) == 'undefined') {
         res.redirect('http://localhost:3000/fermeh/admin/login')
     }
     else {
@@ -396,13 +466,13 @@ route.get('/fermeh/admin/orders', CatchAsync(async (req, res) => {
         await pool.request().query(`select MAHD,MAKH,NGAYLAP,TONGTIEN,TEN,PHUONGTHUC,TENKH=(select TENKH 
             from KHACHHANG where KHACHHANG.MAKH=HOADON.MAKH) from HOADON`, async (err, data) => {
             console.log(data.recordset)
-            res.render('admin/orders', { title: "Đơn hàng", bill: data.recordset })
+            res.render('admin/orders', { title: "Đơn hàng", bill: data.recordset, tentk: req.cookies.tentk })
         })
     }
 }))
 //chi tiet hoa don
 route.get('/fermeh/admin/detail-orders', CatchAsync(async (req, res) => {
-    if (role === 0) {
+    if (req.cookies.role == '' || typeof (req.cookies.role) == 'undefined') {
         res.redirect('http://localhost:3000/fermeh/admin/login')
     }
     else {
@@ -415,12 +485,12 @@ route.get('/fermeh/admin/detail-orders', CatchAsync(async (req, res) => {
                 var hd = data.recordset
                 console.log(hd)
                 await pool.request().query(sqlDetail, async (err, data) => {
-                    res.render('admin/detail-order', { title: "Chi tiết đơn hàng", detail: data.recordset, bill: hd })
+                    res.render('admin/detail-order', { title: "Chi tiết đơn hàng", detail: data.recordset, bill: hd, tentk: req.cookies.tentk })
                 })
             })
         } else {
             console.log([].length == 0)
-            res.render('admin/detail-order', { title: "Chi tiết đơn hàng", detail: [], bill: [] })
+            res.render('admin/detail-order', { title: "Chi tiết đơn hàng", detail: [], bill: [], tentk: req.cookies.tentk })
 
         }
     }
@@ -433,20 +503,20 @@ route.get('/fermeh/admin/detail-orders', CatchAsync(async (req, res) => {
 
 //----------------------------MODULE KHUYẾN MÃI
 route.get('/fermeh/admin/sale', CatchAsync(async (req, res) => {
-    if (role === 0) {
+    if (req.cookies.role == '' || typeof (req.cookies.role) == 'undefined') {
         res.redirect('http://localhost:3000/fermeh/admin/login')
     }
     else {
         let pool = await conn
         await pool.request().query(`select * from KHUYENMAI`, async (err, data) => {
 
-            res.render('admin/sale', { title: "Khuyến mãi", sale: data.recordset })
+            res.render('admin/sale', { title: "Khuyến mãi", sale: data.recordset, tentk: req.cookies.tentk })
         })
     }
 }))
 
 route.post('/fermeh/admin/add-new-sale', CatchAsync(async (req, res) => {
-    if (role === 0) {
+    if (req.cookies.role == '' || typeof (req.cookies.role) == 'undefined') {
         res.redirect('http://localhost:3000/fermeh/admin/login')
     }
     else {
@@ -463,44 +533,44 @@ route.post('/fermeh/admin/add-new-sale', CatchAsync(async (req, res) => {
 
 //----------------------------MODULE KHACH HANG
 route.get('/fermeh/admin/list-customer', CatchAsync(async (req, res) => {
-    if (role === 0) {
+    if (req.cookies.role == '' || typeof (req.cookies.role) == 'undefined') {
         res.redirect('http://localhost:3000/fermeh/admin/login')
     }
     else {
         let pool = await conn
         await pool.request().query(`select * from KHACHHANG`, async (err, data) => {
-            res.render('admin/list_user', { title: "Danh sách khách hàng", customer: data.recordset })
+            res.render('admin/list_user', { title: "Danh sách khách hàng", customer: data.recordset, tentk: req.cookies.tentk })
         })
     }
 }))
 
 
 route.post('/fermeh/admin/list-customer', CatchAsync(async (req, res) => {
-    if (role === 0) {
+    if (req.cookies.role == '' || typeof (req.cookies.role) == 'undefined') {
         res.redirect('http://localhost:3000/fermeh/admin/login')
     }
     else {
         let pool = await conn
         await pool.request().query(`select * from KHACHHANG where MAKH=${parseInt(req.body.customerid)}`, async (err, data) => {
-            res.render('admin/list_user', { title: "Danh sách khách hàng", customer: data.recordset })
+            res.render('admin/list_user', { title: "Danh sách khách hàng", customer: data.recordset, tentk: req.cookies.tentk })
         })
     }
 }))
 
 route.post('/fermeh/admin/customer/find', CatchAsync(async (req, res) => {
-    if (role === 0) {
+    if (req.cookies.role == '' || typeof (req.cookies.role) == 'undefined') {
         res.redirect('http://localhost:3000/fermeh/admin/login')
     }
     else {
         let pool = await conn
         await pool.request().query(`select * from KHACHHANG where MAKH=${parseInt(req.body.customerid)}`, async (err, data) => {
-            res.render('admin/list_user', { title: "Danh sách khách hàng", customer: data.recordset })
+            res.render('admin/list_user', { title: "Danh sách khách hàng", customer: data.recordset, tentk: req.cookies.tentk })
         })
     }
 }))
 
 route.post('/fermeh/admin/customer/detail', CatchAsync(async (req, res) => {
-    if (role === 0) {
+    if (req.cookies.role == '' || typeof (req.cookies.role) == 'undefined') {
         res.redirect('http://localhost:3000/fermeh/admin/login')
     }
     else {
@@ -541,50 +611,116 @@ route.post('/fermeh/admin/customer/detail', CatchAsync(async (req, res) => {
 
 
 route.get('/fermeh/admin/user-report', CatchAsync(async (req, res) => {
-    if (role === 0) {
+    if (req.cookies.role == '' || typeof (req.cookies.role) == 'undefined') {
         res.redirect('http://localhost:3000/fermeh/admin/login')
     }
     else {
-        res.render('admin/user_report', { title: "Doanh thu khách hàng" })
+        let pool = await conn
+        await pool.request().query(`exec admin_salereportuser`, async (err, data) => {
+            res.render('admin/user_report', { title: "Doanh thu khách hàng", tentk: req.cookies.tentk, arr: data.recordset })
+        })
     }
 }))
 
 
-route.get('/fermeh/admin/store-sale', CatchAsync(async (req, res) => {
-    if (role === 0) {
-        res.redirect('http://localhost:3000/fermeh/admin/login')
-    }
-    else {
-        res.render('admin/store_sale', { title: "Doanh thu cửa hàng" })
-    }
-}))
 
 
 route.get('/fermeh/admin/sale-report', CatchAsync(async (req, res) => {
-    if (role === 0) {
+    if (req.cookies.role == '' || typeof (req.cookies.role) == 'undefined') {
         res.redirect('http://localhost:3000/fermeh/admin/login')
     }
     else {
-        res.render('admin/sale_report', { title: "Báo cáo doanh thu" })
+        let pool = await conn
+        var arr = []
+        var d = new Date().getTime()
+        // for (let i = d - 86400000 * 30; i <= d; i += 86400000) {
+        await pool.request().query(`exec admin_salereport '${new Date(d - 86400000 * 30).toLocaleDateString("en-US")}','${new Date().toLocaleDateString("en-US")}'`, async (err, data) => {
+            k = data.recordset
+            var ob = { sohd: 0, tong: 0, sp: 0 }
+            for (let i of k) {
+                ob.sohd += i.HD
+                ob.tong += i.DT
+                ob.sp += i.SP
+            }
+            res.render('admin/sale_report', { title: "Báo cáo doanh thu", tentk: req.cookies.tentk, arr: k, sum: ob })
+        })
     }
 }))
+//
+//-----------------------------TAO BAO CAO THEO THANG NGAY NAM
+route.post('/fermeh/admin/sale-report/day', CatchAsync(async (req, res) => {
+    if (req.cookies.role == '' || typeof (req.cookies.role) == 'undefined') {
+        res.redirect('http://localhost:3000/fermeh/admin/login')
+    }
+    else {
+        console.log(req.body)
+        let pool = await conn
+        await pool.request().query(`exec admin_salereportday ${parseInt(req.body.month)},${parseInt(req.body.year)}`, async (err, data) => {
+            let obj = { hd: 0, tien: 0, sp: 0 }
+            for (let i of data.recordset) {
+                obj.hd += i.SOHD
+                obj.tien += i.TONGTIEN
+                obj.sp += i.SOSP
+            }
+            res.send({ data: data.recordset, sum: obj })
+        })
+    }
+}))
+route.post('/fermeh/admin/sale-report/month', CatchAsync(async (req, res) => {
+    if (req.cookies.role == '' || typeof (req.cookies.role) == 'undefined') {
+        res.redirect('http://localhost:3000/fermeh/admin/login')
+    }
+    else {
+        console.log(req.body)
+        let pool = await conn
+        await pool.request().query(`exec admin_salereportmonth ${parseInt(req.body.year)}`, async (err, data) => {
+            let obj = { hd: 0, tien: 0, sp: 0 }
+            for (let i of data.recordset) {
+                obj.hd += i.SOHD
+                obj.tien += i.TONGTIEN
+                obj.sp += i.SOSP
+            }
+            res.send({ data: data.recordset, sum: obj })
+        })
+    }
+}))
+route.post('/fermeh/admin/sale-report/year', CatchAsync(async (req, res) => {
+    if (req.cookies.role == '' || typeof (req.cookies.role) == 'undefined') {
+        res.redirect('http://localhost:3000/fermeh/admin/login')
+    }
+    else {
+        console.log(req.body)
+        let pool = await conn
+        await pool.request().query(`exec admin_salereportyear`, async (err, data) => {
+            let obj = { hd: 0, tien: 0, sp: 0 }
+            for (let i of data.recordset) {
+                obj.hd += i.SOHD
+                obj.tien += i.TONGTIEN
+                obj.sp += i.SOSP
+            }
+            res.send({ data: data.recordset, sum: obj })
+        })
+    }
+}))
+//-----------------------------TAO BAO CAO THEO THANG NGAY NAM
+//
 
 
 route.get('/fermeh/admin/user-profile', async (req, res) => {
-    if (role === 0) {
+    if (req.cookies.role == '' || typeof (req.cookies.role) == 'undefined') {
         res.redirect('http://localhost:3000/fermeh/admin/login')
     }
     else {
-        res.render('admin/user_profile', { title: "Thông tin" })
+        res.render('admin/user_profile', { title: "Thông tin", tentk: req.cookies.tentk })
     }
 })
 
 route.get('/fermeh/admin/setting', async (req, res) => {
-    if (role === 0) {
+    if (req.cookies.role == '' || typeof (req.cookies.role) == 'undefined') {
         res.redirect('http://localhost:3000/fermeh/admin/login')
     }
     else {
-        res.render('admin/setting', { title: "Cài đặt" })
+        res.render('admin/setting', { title: "Cài đặt", tentk: req.cookies.tentk })
     }
 })
 

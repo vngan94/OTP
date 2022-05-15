@@ -74,20 +74,19 @@
                             <a class="nav-link dropdown-toggle dropdown-toggle-nocaret" href="#"
                                 data-bs-toggle="dropdown">
                                 <div class="user-setting d-flex align-items-center gap-1">
-                                    <img src="/public/img/web-icon.png" class="user-img" alt="">
-                                    <div class="user-name d-none d-sm-block">Jhon Deo</div>
+                                    <!-- <img src="/public/img/web-icon.png" class="user-img" alt=""> -->
+                                    <div class="user-name d-none d-sm-block" style="padding:0 10px ;"><%=tentk%></div>
                                 </div>
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end">
                                 <li>
                                     <a class="dropdown-item" href="/fermeh/admin/user-profile">
                                         <div class="d-flex align-items-center">
-                                            <img src="/public/img/slider-img/mau-anh-1.jpg" alt=""
-                                                class="rounded-circle" width="60" height="60">
+                                            <!-- <img src="/public/img/slider-img/mau-anh-1.jpg" alt=""
+                                                class="rounded-circle" width="60" height="60"> -->
                                             <div class="ms-3">
-                                                <h6 class="mb-0 dropdown-user-name">Jhon Deo</h6>
-                                                <small class="mb-0 dropdown-user-designation text-secondary">HR
-                                                    Manager</small>
+                                                <h6 class="mb-0 dropdown-user-name"><%=tentk%></h6>
+                                                <small class="mb-0 dropdown-user-designation text-secondary"></small>
                                             </div>
                                         </div>
                                     </a>
@@ -184,7 +183,7 @@
                                         </a>
                                     </div>
                                     <div class="col">
-                                        <a href="/fermeh/admin/store-sale">
+                                        <a href="/fermeh/admin/user-report">
                                             <div class="apps p-2 radius-10 text-center">
                                                 <div class="apps-icon-box mb-1 text-white bg-pink bg-gradient">
                                                     <i class="bi bi-credit-card-fill"></i>
@@ -242,8 +241,9 @@
                 </ul>
             </div>
             <div class="textmenu">
-                <div class="brand-logo">
-                    <img src="/public/img/web-icon.png" width="140" alt="" />
+                <div class="brand-logo" style="justify-content: center;">
+                    <!-- <img src="/public/img/web-icon.png" width="140" alt="" /> -->
+                    <h4 style="margin: 0;"><a href="http://localhost:3000/fermeh/admin-site">FERMEH</a></h4>
                 </div>
                 <div class="tab-content">
                     <div class="tab-pane fade" id="pills-application">
@@ -323,8 +323,8 @@
                                 cáo doanh thu</a>
                             <a href="/fermeh/admin/user-report" class="list-group-item"><i
                                     class="bi bi-basket3"></i>Doanh số khách hàng</a>
-                            <a href="/fermeh/admin/store-sale" class="list-group-item"><i
-                                    class="bi bi-graph-up"></i>Doanh số cửa hàng</a>
+                            <!-- <a href="/fermeh/admin/store-sale" class="list-group-item"><i
+                                    class="bi bi-graph-up"></i>Doanh số cửa hàng</a> -->
                         </div>
                     </div>
                     <!-- <div class="tab-pane fade" id="pills-charts">

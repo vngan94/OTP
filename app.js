@@ -49,13 +49,20 @@ async function loadProduct() {
 //
 //
 app.get("/", async (req, res) => {
+    res.cookie('sdt', '`0334397556`')
+    console.log(req.cookies)
     let pool = await conn
     res.send("WELCOME TO 3000 PORT")
 })
 app.get("/fermeh", CatchAsync(async (req, res) => {
+    if (typeof (req.cookies.sdt) == 'undefined') {
+        res.cookie('sdt', '')
+        res.cookie('taikhoan', 'Tài khoản')
+    }
+    var cookie = await req.cookies
     let pool = await conn; var m_list = {}; var newPro = {};
     let loadProduct = `exec exe_CTGH @sdt='${sdt}'`
-    if ((req.cookies['loadProduct'] == 'false' || req.cookies['loadProduct'] == undefined) && taikhoan != 'Tài khoản' && sdt != '') {
+    if ((req.cookies['loadProduct'] == 'false' || req.cookies['loadProduct'] == undefined) && (req.cookies.sdt != '' && typeof (req.cookies.sdt != 'undefined'))) {
         pool.request().query(loadProduct, (err, data) => {
             if (data.recordset.length > 0) {
                 for (let i of data.recordset) {
@@ -66,11 +73,6 @@ app.get("/fermeh", CatchAsync(async (req, res) => {
             else res.cookie("loadProduct", "false")
         })
     }
-    // else if (taikhoan === 'Tài khoản' && sdt === '') {
-    //     for (let i in req.cookies) {
-    //         res.clearCookie(i)
-    //     }
-    // }
     let sqlNewPro = "SELECT TOP 8 * FROM LOAISANPHAM ORDER BY NGAYRAMAT DESC"
     let sqlString = 'SELECT TOP 4 * FROM LOAISANPHAM'
     await pool.request().query(sqlNewPro, async (err, data1) => {
@@ -78,7 +80,7 @@ app.get("/fermeh", CatchAsync(async (req, res) => {
         await pool.request().query(sqlString, (err, data) => {
             m_list = data.recordset;
             // res.cookie('name', 'Tan Ngoc')
-            res.render('shop/home', { title: "FERMEH", list: m_list, newList: newPro, taikhoan: taikhoan })
+            res.render('shop/home', { title: "FERMEH", list: m_list, newList: newPro, taikhoan: req.cookies.taikhoan })
         })
     })
 }))
@@ -88,7 +90,7 @@ app.get('/fermeh/collections/:name', CatchAsync(
         let pool = await conn;
         let sqlString = `SELECT * FROM LOAISANPHAM WHERE DANHMUC='${req.params.name.toUpperCase()}'`
         await pool.request().query(sqlString, (err, data) => {
-            res.render('shop/category', { title: `San pham cho ${req.params.name}`, list: data.recordset, name: req.params.name, taikhoan: taikhoan })
+            res.render('shop/category', { title: `Sản phẩm cho ${req.params.name}`, list: data.recordset, name: req.params.name, taikhoan: req.cookies.taikhoan })
         })
     }
 ))
@@ -98,7 +100,7 @@ app.get('/fermeh/collections/type/:name', CatchAsync(
         let pool = await conn;
         let sqlString = `SELECT * FROM LOAISANPHAM WHERE CTLOAI='${req.params.name.toUpperCase()}'`
         await pool.request().query(sqlString, (err, data) => {
-            res.render('shop/category', { title: `${req.params.name}`, list: data.recordset, taikhoan: taikhoan, name: 'nam' })
+            res.render('shop/category', { title: `${req.params.name}`, list: data.recordset, taikhoan: req.cookies.taikhoan, name: 'nam' })
         })
     }))
 //theo hang san xuat
@@ -110,7 +112,7 @@ app.get('/fermeh/collections/brand/:name', CatchAsync(
         let sqlString = `exec exe_renderBrand '${name.toUpperCase()}'`
         await pool.request().query(sqlString, (err, data) => {
             console.log(data.recordset)
-            res.render('shop/category', { title: req.params.name, list: data.recordset, taikhoan: taikhoan, name: 'nam' })
+            res.render('shop/category', { title: req.params.name, list: data.recordset, taikhoan: req.cookies.taikhoan, name: 'nam' })
         })
     }
 ))
@@ -222,13 +224,24 @@ app.post('/fermeh/login', CatchAsync(async (req, res) => {
                                 else {
                                     sdt = l_data[0].SDT
                                     taikhoan = `${l_data[0].TENKH}`
+                                    //
+                                    //
+                                    //
+
+                                    //
+                                    //
+                                    //
                                     cookie = req.cookies;
                                     for (var prop in cookie) {
-                                        // if (!cookie.hasOwnProperty(prop)) {
-                                        //     continue;
-                                        // }
+                                        if (prop === 'role' || prop === 'tknv' || prop === 'tentk') continue
                                         res.cookie(prop, '', { expires: new Date(0) });
                                     }
+                                    //
+                                    //
+                                    res.cookie('sdt', l_data[0].SDT)
+                                    res.cookie('taikhoan', l_data[0].TENKH)
+                                    //
+                                    //
                                     res.redirect("/fermeh")
                                 }
                             })
@@ -279,7 +292,7 @@ app.get('/fermeh/detail/:id', CatchAsync(
             await pool.request().query(sqlSecond, (err, data) => {
                 let list = data.recordset;
                 // console.log(list)
-                res.render('shop/product', { title: detail[0].TENSP, detail: detail, list: list, taikhoan: taikhoan })
+                res.render('shop/product', { title: detail[0].TENSP, detail: detail, list: list, taikhoan: req.cookies.taikhoan })
             })
         })
     }
@@ -289,18 +302,18 @@ app.get('/fermeh/detail/:id', CatchAsync(
 //
 app.get("/fermeh/favourite", async (req, res) => {
     let pool = await conn
-    if (taikhoan === 'Tài khoản' && sdt === '') {
+    if (req.cookies.sdt == '' || typeof (req.cookies.sdt) == 'undefined') {
         res.render("shop/login", { title: "Đăng nhập", message: "" })
     }
     else {
-        let sqlString = `exec exe_renderFavourite @sdt='${sdt}'`
+        let sqlString = `exec exe_renderFavourite @sdt='${req.cookies.sdt}'`
         pool.request().query(sqlString, async (err, data) => {
             let rel = data.recordset
             if (rel.length === 0) {
-                res.render("shop/favourite", { title: "Yêu thích", fav: '', taikhoan: taikhoan })
+                res.render("shop/favourite", { title: "Yêu thích", fav: '', taikhoan: req.cookies.taikhoan })
             }
             else {
-                res.render("shop/favourite", { title: "Yêu thích", fav: rel, taikhoan: taikhoan })
+                res.render("shop/favourite", { title: "Yêu thích", fav: rel, taikhoan: req.cookies.taikhoan })
             }
         })
     }
@@ -309,11 +322,11 @@ app.post('/fermeh/add-to-fav/:id', async (req, res) => {
     let pool = await conn
     // console.log(req.params)
     // console.log(req.body)
-    if (taikhoan === 'Tài khoản' && sdt === '') {
+    if (req.cookies.sdt == '' || typeof (req.cookies.sdt) == 'undefined') {
         res.render("shop/login", { title: "Đăng nhập", message: "" })
     }
     else {
-        let sqlString = `exec exe_insertFav @sdt='${sdt}',@masp=${parseInt(req.params.id)},@size=${parseInt(req.body['size_choose'])}`
+        let sqlString = `exec exe_insertFav @sdt='${req.cookies.sdt}',@masp=${parseInt(req.params.id)},@size=${parseInt(req.body['size_choose'])}`
         pool.request().query(sqlString, (err, data) => {
             res.redirect(`/fermeh/detail/${req.params.id}`)
         })
@@ -334,9 +347,9 @@ app.post('/fermeh/fav/add-to-cart', CatchAsync(async (req, res) => {
     res.redirect(`/fermeh/favourite`)
 }))
 app.post('/fermeh/fav/del-product', CatchAsync(async (req, res) => {
-    console.log(req.body)
+    // console.log(req.body)
     let pool = await conn
-    let sqlString = `exec exe_delFavProduct @sdt='${sdt}',@masp=${parseInt(req.body.masp)},@size=${parseInt(req.body.size)}`
+    let sqlString = `exec exe_delFavProduct @sdt='${req.cookies.sdt}',@masp=${parseInt(req.body.masp)},@size=${parseInt(req.body.size)}`
     pool.request().query(sqlString, (err, data) => {
     })
     res.redirect(`/fermeh/favourite`)
@@ -363,13 +376,13 @@ app.get("/fermeh/cart", async (req, res) => {
     //console.log('list product', listProduct)
     let cnt = 0;
     let pool = await conn
-    if (sdt != '' && taikhoan != 'Tài khoản') {
-        let loadProduct = `exec exe_CTGH @sdt='${sdt}'`
+    if (req.cookies.sdt != '' && typeof (req.cookies.sdt) != 'undefined') {
+        let loadProduct = `exec exe_CTGH @sdt='${req.cookies.sdt}'`
         pool.request().query(loadProduct, (err, data) => {
             if (data.recordset.length > 0) {
                 // console.log('data record', data.recordset)
                 for (let i in listProduct) {
-                    if (i === 'loadProduct') continue;
+                    if (i === 'loadProduct' || i === 'sdt' || i === 'taikhoan' || i === 'role' || i === 'tentk' || i === 'tknv') continue;
                     cnt = 0
                     let arr = i.split('_')
                     //console.log('arr=', arr)
@@ -396,7 +409,7 @@ app.get("/fermeh/cart", async (req, res) => {
             }
             else {
                 for (let i in listProduct) {
-                    if (i === 'loadProduct') continue;
+                    if (i === 'loadProduct' || i === 'taikhoan' || i === 'sdt' || i === 'role' || i === 'tentk' || i === 'tknv') continue;
                     let insertProduct = `exec exe_insertCTGH @sdt='${sdt}',@masp=${parseInt(i.split('_')[1])},@size=${parseInt(i.split('_')[2])} ,@soluong =${parseInt(listProduct[i])}`
                     pool.request().query(insertProduct, (err, data) => {
                         // console.log('i bằng', i)
@@ -409,7 +422,7 @@ app.get("/fermeh/cart", async (req, res) => {
             }
         })
         setTimeout(() => {
-            let renderCart = `exec exe_renderCart @sdt='${sdt}'`
+            let renderCart = `exec exe_renderCart @sdt='${req.cookies.sdt}'`
             pool.request().query(renderCart, (err, data) => {
                 //console.log(data.recordset)
                 if (data.recordset.length > 0) {
@@ -417,31 +430,48 @@ app.get("/fermeh/cart", async (req, res) => {
                     for (let i of data.recordset) {
                         tong += i.GIA * i.SOLUONG
                     }
-                    return res.render("shop/cart", { title: "Giỏ hàng", taikhoan: taikhoan, sdt: sdt, cart: data.recordset, tongtien: tong })
+                    return res.render("shop/cart", { title: "Giỏ hàng", taikhoan: req.cookies.taikhoan, sdt: req.cookies.sdt, cart: data.recordset, tongtien: tong })
                 }
                 else {
-                    return res.render("shop/cart", { title: "Giỏ hàng", taikhoan: taikhoan, sdt: sdt, cart: '', tongtien: 0 })
+                    return res.render("shop/cart", { title: "Giỏ hàng", taikhoan: req.cookies.taikhoan, sdt: req.cookies.sdt, cart: '', tongtien: 0 })
                 }
             })
         }, 200);
     }
     else {
         let arr = req.cookies
-        var cart = []; let j = Object.keys(arr).length
+        // console.log(arr)
+        var cart = [];
+        var count = 0
+        // console.log(Object.keys(arr)[Object.keys(arr).length - 1])
         var rel = []
         if (Object.getPrototypeOf(arr) != null) {
             for (let i in arr) {
+                if (i === 'sdt' || i === 'taikhoan' || i === 'role' || i === 'tentk' || i === 'tknv' || i === 'loadProduct') {
+                    count++;
+                    //console.log('count=', count)
+                    if (count == Object.keys(arr).length) {
+                        res.render("shop/cart", { title: "Giỏ hàng", taikhoan: req.cookies.taikhoan, sdt: req.cookies.sdt, cart: '' })
+                        break
+                    } else {
+                        continue
+                    }
+                }
+                //  console.log('xx')
                 let sqlString = `select GIA,MINSIZE,MAXSIZE,TENSP,CTLOAI,IDHA from LOAISANPHAM where MASP=${i.split('_')[1]}`
                 pool.request().query(sqlString, (err, data) => {
                     try {
-                        cart.push(data.recordset[0]); j--; console.log(j)
-                        if (j === 0) {
+                        cart.push(data.recordset[0]); console.log(i)
+                        // console.log('cart length=', cart.length)
+                        //  console.log(i == Object.keys(arr)[Object.keys(arr).length - 1])
+                        if (count + cart.length == Object.keys(arr).length) {
                             var tong = 0;
                             // for (let i of cart) {
                             //     tong += i.GIA
                             // }
                             let id = 0;
                             for (let k in arr) {
+                                if (k === 'loadProduct' || k === 'taikhoan' || k === 'sdt' || k === 'role' || k === 'tentk' || k === 'tknv') continue;
                                 let oj = {}
                                 oj['GIA'] = cart[id].GIA;
                                 oj['MINSIZE'] = cart[id].MINSIZE
@@ -456,26 +486,34 @@ app.get("/fermeh/cart", async (req, res) => {
                                 tong += oj['GIA'] * oj['SOLUONG']
                                 rel.push(oj)
                             }
-                            console.log(rel)
-                            return res.render("shop/cart", { title: "Giỏ hàng", taikhoan: taikhoan, sdt: sdt, cart: rel, tongtien: tong })
+                            console.log('rel =', rel)
+                            if (rel.length == 0) {
+                                return res.render("shop/cart", { title: "Giỏ hàng", taikhoan: req.cookies.taikhoan, sdt: req.cookies.sdt, cart: '' })
+                            }
+                            else {
+                                return res.render("shop/cart", { title: "Giỏ hàng", taikhoan: req.cookies.taikhoan, sdt: req.cookies.sdt, cart: rel, tongtien: tong })
+                            }
                         }
                     }
                     catch (e) {
-                        return res.render("shop/cart", { title: "Giỏ hàng", taikhoan: taikhoan, sdt: sdt, cart: '' })
+                        return res.render("shop/cart", { title: "Giỏ hàng", taikhoan: req.cookies.taikhoan, sdt: req.cookies.sdt, cart: '' })
                     }
                 })
             }
+            // if (count == Object.keys(arr).length) {
+            //     return res.render("shop/cart", { title: "Giỏ hàng", taikhoan: req.cookies.taikhoan, sdt: req.cookies.sdt, cart: '' })
+            // }
         }
         else {
             //console.log(arr)
-            res.render("shop/cart", { title: "Giỏ hàng", taikhoan: taikhoan, sdt: sdt, cart: '' })
+            res.render("shop/cart", { title: "Giỏ hàng", taikhoan: req.cookies.taikhoan, sdt: req.cookies.sdt, cart: '' })
         }
     }
 })
 //---------------------FORM THANH TOAN
 //
 app.post("/fermeh/pay-success", async (req, res) => {
-    res.render('shop/paysuccess', { title: "Thanh toán thành công", taikhoan: taikhoan, sdt: sdt })
+    res.render('shop/paysuccess', { title: "Thanh toán thành công", taikhoan: req.cookies.taikhoan, sdt: req.cookies.sdt })
 })
 // -------------------------------------THANH TOAN XU LY
 app.post("/fermeh/payment", async (req, res) => {
@@ -498,15 +536,15 @@ app.post("/fermeh/payment", async (req, res) => {
     let pool = await conn
     console.log('arr', arr)
     console.log(ten, email, phone, diachi, method, tong)
-    let sqlHD = `exec exe_insertHOADON '${sdt}',${parseInt(tong)},N'${diachi.trim()}','${method}'`
-    if (sdt != '') {
+    let sqlHD = `exec exe_insertHOADON '${req.cookies.sdt}',${parseInt(tong)},N'${diachi.trim()}','${method}'`
+    if (req.cookies.sdt != '' || typeof (req.cookies.sdt) != 'undefined') {
         await
             pool.request().query(sqlHD, async (err, data) => {
                 var mahd = parseInt(data.recordset[0].MAHD)
                 console.log('tạo hóa đơn thành công!')
                 console.log(arr)
                 for (let i of arr) {
-                    let sqldel = `exec exe_delCartProduct '${sdt}',${parseInt(i.MASP)},${parseInt(i.SIZE)}`
+                    let sqldel = `exec exe_delCartProduct '${req.cookies.sdt}',${parseInt(i.MASP)},${parseInt(i.SIZE)}`
                     await pool.request().query(sqldel, (err, data) => { console.log('xoa thanh cong!') })
                     try {
                         res.clearCookie(`product_${parseInt(i.MASP)}_${parseInt(i.SIZE)}`)
@@ -556,8 +594,8 @@ app.get("/fermeh/payment", async (req, res) => {
     let listProduct = req.cookies
     let cnt = 0;
     let pool = await conn
-    if (sdt != '') {
-        let loadProduct = `exec exe_CTGH @sdt='${sdt}'`
+    if (req.cookies.sdt != '' || typeof (req.cookies.sdt) != 'undefined') {
+        let loadProduct = `exec exe_CTGH @sdt='${req.cookies.sdt}'`
         pool.request().query(loadProduct, (err, data) => {
         })
         setTimeout(() => {
@@ -565,7 +603,7 @@ app.get("/fermeh/payment", async (req, res) => {
             pool.request().query(renderCart, async (err, data) => {
                 if (data.recordset.length > 0) {
                     var cart = data.recordset
-                    let sqlrenderPayment = `exec exe_renderPayment '${sdt}'`
+                    let sqlrenderPayment = `exec exe_renderPayment '${req.cookies.sdt}'`
                     await pool.request().query(sqlrenderPayment, async (err, data) => {
                         if (data.recordset.length > 0) {
                             let payment = data.recordset
@@ -573,28 +611,28 @@ app.get("/fermeh/payment", async (req, res) => {
                             for (let i of payment) {
                                 tong += i.GIA * i.SOLUONG
                             }
-                            let renderLocate = `exec exe_renderLocatePayment '${sdt}'`
+                            let renderLocate = `exec exe_renderLocatePayment '${req.cookies.sdt}'`
                             await pool.request().query(renderLocate, async (err, data) => {
                                 if (data.recordset.length > 0) {
-                                    return res.render("shop/payment", { title: "Thanh toán", taikhoan: taikhoan, sdt: sdt, cart: cart, tongtien: tong, locate: data.recordset, payment: payment })
+                                    return res.render("shop/payment", { title: "Thanh toán", taikhoan: req.cookies.taikhoan, sdt: req.cookies.sdt, cart: cart, tongtien: tong, locate: data.recordset, payment: payment })
                                 } else {
                                     let renderTinh = `exec exe_requestTinh`
                                     await pool.request().query(renderTinh, async (err, data) => {
-                                        return res.render("shop/payment", { title: "Thanh toán", taikhoan: taikhoan, sdt: sdt, cart: cart, tongtien: tong, locate: "", tinh: data.recordset, payment: payment })
+                                        return res.render("shop/payment", { title: "Thanh toán", taikhoan: req.cookies.taikhoan, sdt: req.cookies.sdt, cart: cart, tongtien: tong, locate: "", tinh: data.recordset, payment: payment })
                                     })
 
                                 }
                             })
                         }
                         else {
-                            let renderLocate = `exec exe_renderLocatePayment '${sdt}'`
+                            let renderLocate = `exec exe_renderLocatePayment '${req.cookies.sdt}'`
                             await pool.request().query(renderLocate, async (err, data) => {
                                 if (data.recordset.length > 0) {
-                                    return res.render("shop/payment", { title: "Thanh toán", taikhoan: taikhoan, sdt: sdt, cart: cart, tongtien: 0, locate: data.recordset, payment: [] })
+                                    return res.render("shop/payment", { title: "Thanh toán", taikhoan: req.cookies.taikhoan, sdt: req.cookies.sdt, cart: cart, tongtien: 0, locate: data.recordset, payment: [] })
                                 } else {
                                     let renderTinh = `exec exe_requestTinh`
                                     await pool.request().query(renderTinh, async (err, data) => {
-                                        return res.render("shop/payment", { title: "Thanh toán", taikhoan: taikhoan, sdt: sdt, cart: cart, tongtien: 0, locate: "", tinh: data.recordset, payment: [] })
+                                        return res.render("shop/payment", { title: "Thanh toán", taikhoan: req.cookies.taikhoan, sdt: req.cookies.sdt, cart: cart, tongtien: 0, locate: "", tinh: data.recordset, payment: [] })
                                     })
 
                                 }
@@ -677,7 +715,7 @@ app.get("/fermeh/payment", async (req, res) => {
                                             }
                                         }
                                         await pool.request().query('drop table ##paymentContain', (err, data) => {
-                                            return res.render("shop/payment", { title: "Thanh toán", taikhoan: taikhoan, sdt: sdt, cart: rel, tongtien: tong, tinh: tinh, payment: payment })
+                                            return res.render("shop/payment", { title: "Thanh toán", taikhoan: req.cookies.taikhoan, sdt: req.cookies.sdt, cart: rel, tongtien: tong, tinh: tinh, payment: payment })
                                         })
                                     })
                                 }, 100);
@@ -685,24 +723,24 @@ app.get("/fermeh/payment", async (req, res) => {
                         }
                     }
                     catch (e) {
-                        return res.render("shop/payment", { title: "Thanh toán", taikhoan: taikhoan, sdt: sdt, cart: '' })
+                        return res.render("shop/payment", { title: "Thanh toán", taikhoan: req.cookies.taikhoan, sdt: req.cookies.sdt, cart: '' })
                     }
                 })
             }
         }
         else {
             //console.log(arr)
-            res.render("shop/payment", { title: "Thanh toán", taikhoan: taikhoan, sdt: sdt, cart: '' })
+            res.render("shop/payment", { title: "Thanh toán", taikhoan: req.cookies.taikhoan, sdt: req.cookies.sdt, cart: '' })
         }
     }
 })
 //
 //---------------------FORM THANH TOAN
 app.post('/fermeh/cart/del-product', CatchAsync(async (req, res) => {
-    if (taikhoan != 'Tài khoản' && sdt != '') {
+    if (req.cookies.sdt != '' || typeof (req.cookies.sdt) != 'undefined') {
         console.log(req.body)
         let pool = await conn
-        let sqlString = `exec exe_delCartProduct @sdt='${sdt}',@masp=${parseInt(req.body.masp)},@size=${parseInt(req.body.size)}`
+        let sqlString = `exec exe_delCartProduct @sdt='${req.cookies.sdt}',@masp=${parseInt(req.body.masp)},@size=${parseInt(req.body.size)}`
         pool.request().query(sqlString, (err, data) => {
         })
         res.redirect(`/fermeh/cart`)
@@ -717,15 +755,18 @@ app.post('/fermeh/cart/del-product', CatchAsync(async (req, res) => {
 app.get("/fermeh/user/logout", (req, res) => {
     //xóa hết mấy cái cookie đi 
     for (let i in req.cookies) {
+        if (i === 'role' || i === 'tknv' || i === 'tentk') continue
         res.clearCookie(i)
     }
+    res.cookie('sdt', '')
+    res.cookie('taikhoan', 'Tài khoản')
     taikhoan = 'Tài khoản'
     sdt = ''
     res.redirect('/fermeh')
 })
 app.get("/fermeh/user/setting", async (req, res) => {
     let pool = await conn;
-    let sqlString = `exec exe_renderSetting @sdt='${sdt}'`
+    let sqlString = `exec exe_renderSetting @sdt='${req.cookies.sdt}'`
     await pool.request().query(sqlString, (err, data) => {
         try {
             data.recordset[0].EMAIL.prototype
@@ -735,18 +776,18 @@ app.get("/fermeh/user/setting", async (req, res) => {
         }
         if (data.recordset.length > 0) {
             let set = data.recordset
-            let sqlLocate = `exec exe_renderLocate '${sdt}'`
+            let sqlLocate = `exec exe_renderLocate '${req.cookies.sdt}'`
             pool.request().query(sqlLocate, (err, data) => {
                 if (data.recordset.length > 0) {
-                    res.render("user/setting", { title: 'Cài đặt', set: set, taikhoan: taikhoan, sdt: sdt, diachi: data.recordset })
+                    res.render("user/setting", { title: 'Cài đặt', set: set, taikhoan: req.cookies.taikhoan, sdt: req.cookies.sdt, diachi: data.recordset })
                 }
                 else {
-                    res.render("user/setting", { title: 'Cài đặt', set: set, taikhoan: taikhoan, sdt: sdt, diachi: 0 })
+                    res.render("user/setting", { title: 'Cài đặt', set: set, taikhoan: req.cookies.taikhoan, sdt: req.cookies.sdt, diachi: 0 })
                 }
             })
         }
         else {
-            res.render("user/setting", { title: 'Cài đặt', taikhoan: taikhoan, sdt: sdt })
+            res.render("user/setting", { title: 'Cài đặt', taikhoan: req.cookies.taikhoan, sdt: req.cookies.sdt })
         }
     })
 })
@@ -756,7 +797,7 @@ app.post('/fermeh/user/changeUsername', async (req, res) => {
 //
 app.get('/fermeh/user/order', async (req, res) => {
     let pool = await conn
-    await pool.request().query(`exec exe_renderBill '${sdt}'`, async (err, data) => {
+    await pool.request().query(`exec exe_renderBill '${req.cookies.sdt}'`, async (err, data) => {
         var bill = data.recordset
         console.log(bill)
         var arr = []
@@ -778,7 +819,7 @@ app.get('/fermeh/user/order', async (req, res) => {
         }
         console.log(arr)
         // console.log(arr[0][0].NGAYLAP)
-        res.render('user/order', { title: 'Đơn hàng đã mua', taikhoan: taikhoan, sdt: sdt, arr: arr })
+        res.render('user/order', { title: 'Đơn hàng đã mua', taikhoan: req.cookies.taikhoan, sdt: req.cookies.sdt, arr: arr })
     })
 })
 //---------------------------SEARCH FORM--------------------------------
@@ -796,10 +837,10 @@ app.get('/fermeh/search', CatchAsync(async (req, res) => {
     name = name.replace(/đ/g, "d");
     await pool.request().query(`exec exe_searchProduct '${name}'`, async (err, data) => {
         if (data.recordset.length > 0) {
-            res.render('shop/category', { taikhoan: taikhoan, title: `Kết quả tìm kiếm cho "${req.query.name}"-fermeh`, name: 'nam', list: data.recordset })
+            res.render('shop/category', { taikhoan: req.cookies.taikhoan, title: `Kết quả tìm kiếm cho "${req.query.name}"-fermeh`, name: 'nam', list: data.recordset })
         }
         else {
-            res.render('shop/category', { taikhoan: taikhoan, title: `Kết quả tìm kiếm cho "${req.query.name}"-fermeh`, name: 'nam', list: [] })
+            res.render('shop/category', { taikhoan: req.cookies.taikhoan, title: `Kết quả tìm kiếm cho "${req.query.name}"-fermeh`, name: 'nam', list: [] })
         }
     })
 }))
@@ -809,7 +850,7 @@ app.get('/fermeh/search', CatchAsync(async (req, res) => {
 app.post('/fermeh/ajax/update-quantity-product', async (req, res) => {
     if (sdt != '') {
         let pool = await conn;
-        let sqlString = `exec exe_updateCTGH '${sdt}',${parseInt(req.body.MASP)},${parseInt(req.body.SIZE)},${parseInt(req.body.SOLUONG)}`
+        let sqlString = `exec exe_updateCTGH '${req.cookies.sdt}',${parseInt(req.body.MASP)},${parseInt(req.body.SIZE)},${parseInt(req.body.SOLUONG)}`
         await pool.request().query(sqlString, (err, data) => {
         })
         let sqlString1 = `select GIA from LOAISANPHAM where MASP=${parseInt(req.body.MASP)}`
@@ -831,11 +872,11 @@ app.post('/fermeh/ajax/update-quantity-product', async (req, res) => {
 })
 app.post('/fermeh/ajax/update-size-product', async (req, res) => {
     let coo = req.cookies
-    if (sdt != '') {
+    if (req.cookies.sdt != '' || typeof (req.cookies.sdt) != 'undefined') {
         let newSize = req.body.SIZE
         let pool = await conn;
-        let sqlCart = `exec exe_renderCart '${sdt}'`
-        let sqlString = `exec exe_updateSizeCTGH '${sdt}',${parseInt(req.body.MASP)},${parseInt(req.body.SIZE)},${parseInt(req.body.OLDSIZE)}`
+        let sqlCart = `exec exe_renderCart '${req.cookies.sdt}'`
+        let sqlString = `exec exe_updateSizeCTGH '${req.cookies.sdt}',${parseInt(req.body.MASP)},${parseInt(req.body.SIZE)},${parseInt(req.body.OLDSIZE)}`
         await pool.request().query(sqlCart, (err, data) => {
             let chk = false
             if (data.recordset.length > 0) {
@@ -1050,7 +1091,7 @@ app.post('/fermeh/ajax/validate-new-form-locate', CatchAsync(async (req, res) =>
 app.post('/fermeh/ajax/request-delete-locate', CatchAsync(async (req, res) => {
     let iddc = parseInt(req.body.iddc)
     let pool = await conn
-    let sqlString = `exec exe_deleteLocate '${sdt}',${iddc}`
+    let sqlString = `exec exe_deleteLocate '${req.cookies.sdt}',${iddc}`
     await pool.request().query(sqlString, (err, data) => {
 
     })
@@ -1060,7 +1101,7 @@ app.post('/fermeh/ajax/request-delete-locate', CatchAsync(async (req, res) => {
 app.post('/fermeh/ajax/set-default-locate-btn', CatchAsync(async (req, res) => {
     let pool = await conn
     let ID = parseInt(req.body.IDDC)
-    let sql = `exec exe_updateDefaultLocate '${sdt}',${ID}`
+    let sql = `exec exe_updateDefaultLocate '${req.cookies.sdt}',${ID}`
     pool.request().query(sql, (err, data) => {
         res.send({ error: true })
     })
@@ -1080,10 +1121,11 @@ app.post('/fermeh/ajax/setting/change-username', CatchAsync(async (req, res) => 
     name = name.replace(/ỳ|ý|ỵ|ỷ|ỹ/g, "y");
     name = name.replace(/đ/g, "d");
     if (regexName.test(name)) {
-        let sql = `exec exe_updateTenKH '${sdt}',N'${text}'`
+        let sql = `exec exe_updateTenKH '${req.cookies.sdt}',N'${text}'`
         let pool = await conn
         pool.request().query(sql, (err, data) => {
             taikhoan = text
+            res.cookie('taikhoan', text)
             res.send({ error: true })
         })
     }
@@ -1101,9 +1143,10 @@ app.post('/fermeh/ajax/setting/change-phonenumber', CatchAsync(async (req, res) 
         let sql = `exec exe_checkSDT '${phone.trim()}'`
         pool.request().query(sql, (err, data) => {
             if (data.recordset.length === 0) {
-                let nsql = `exec exe_updateSDTKH @sdt='${sdt}',@nsdt='${phone.trim()}'`
+                let nsql = `exec exe_updateSDTKH @sdt='${req.cookies.sdt}',@nsdt='${phone.trim()}'`
                 pool.request().query(nsql, (err, data) => {
                     sdt = phone
+                    res.cookie('sdt', phone)
                     res.send({ error: true })
                 })
             }
@@ -1123,7 +1166,7 @@ app.post('/fermeh/ajax/setting/change-email', CatchAsync(async (req, res) => {
     let regexMail = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
     let mail = req.body.email
     if (regexMail.test(mail)) {
-        let sql = `exec exe_updateMailKH '${sdt}','${mail}'`
+        let sql = `exec exe_updateMailKH '${req.cookies.sdt}','${mail}'`
         let pool = await conn
         pool.request().query(sql, (err, data) => {
             res.send({ error: true, email: mail })
@@ -1156,10 +1199,10 @@ app.post('/fermeh/ajax/setting/change-password', CatchAsync(async (req, res) => 
         }).then((res) => { newPass = res.data.Digest })
             .catch((err) => { console.log("errrrr", err) })
         let pool = await conn
-        let sqlChk = `exec exe_findKH '${sdt}','${cipherPass}'`
+        let sqlChk = `exec exe_findKH '${req.cookies.sdt}','${cipherPass}'`
         pool.request().query(sqlChk, async (err, data) => {
             if (data.recordset.length > 0) {
-                let nsql = `exec exe_updatePassKH '${sdt}','${newPass}'`
+                let nsql = `exec exe_updatePassKH '${req.cookies.sdt}','${newPass}'`
                 await pool.request().query(nsql, (err, data) => {
                     res.send({ error: true })
                 })
