@@ -30,22 +30,26 @@
         .form-main a:hover {
             text-decoration: underline !important;
         }
+
+        .warning {
+            border: 1px solid red;
+        }
     </style>
     <div class="container form-contain">
         <div class="container-fluid">
-            <form class="form-main" action="/fermeh/login" method="post">
+            <form class="form-main" action="" method="post" onsubmit="return validate()">
                 <div
                     style="text-align: center;margin-bottom: 15px;border-bottom: 1px solid #a29bfe;padding-bottom:7px;">
                     <label for="" style="font-size: 35px;font-weight: 600;">Đăng nhập</label>
                 </div>
                 <div class="mb-3" style="margin-top: 25px;">
-                    <input type="text" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp"
+                    <input type="text" class="form-control" id="phoneNumber" aria-describedby="emailHelp"
                         placeholder="Số điện thoại" required name="phoneNumber">
                     <label for="" class="form-text"></label>
                 </div>
                 <div class="mb-3">
-                    <input type="password" class="form-control" id="exampleInputPassword1" placeholder="Mật khẩu"
-                        required name="password">
+                    <input type="password" class="form-control" id="password" placeholder="Mật khẩu" required
+                        name="password">
                     <label for="" class="form-text label-anoun" style="color: red;">
                         <%=typeof message !="undefined" ? message : "" %>
                     </label>
@@ -66,3 +70,5 @@
             </form>
         </div>
     </div>
+    <script src="/public/jquery/jquery-3.6.0.min.js"></script>
+    <script src="/public/js/login.js"></script>

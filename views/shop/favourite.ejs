@@ -28,6 +28,8 @@
             font-weight: 600;
         }
     </style>
+    <script src="/public/jquery/jquery-3.6.0.min.js"></script>
+    <script src="/public/js/fav.js"></script>
     <%if(fav===''){%>
         <div class="container" style="min-height: 800px;position: relative;padding: 0 0 30px 0;">
             <div class="non-favourite" style="min-height: 500px;"></div>
@@ -43,7 +45,7 @@
         <div class="row mt-4">
             <div class="d-flex contain-product" style="background-color: #fff;padding: 15px 12px;">
                 <div class="product-img">
-                    <img src="/public/img/product/<%=i.IDHA%>_1.jpg" alt="product" class="img-fluid"
+                    <img src="/public/img/product/<%=i.IDHA%>" alt="product" class="img-fluid"
                         style="width: 100%;height: 100%;">
                 </div>
                 <div style="width: 100%;">
@@ -78,7 +80,7 @@
                                 : 'VND' })%>
                             </h5>
                             <form action="/fermeh/fav/add-to-cart" method="post">
-                                <button class="btn btn-dark delete_btn w-100 mt-3 mb-3" value="" style="border-radius: 24px;
+                                <button class="btn btn-dark add_to_cart_btn w-100 mt-3 mb-3" value="" style="border-radius: 24px;
                                 padding: 10px;">Thêm vào giỏ hàng</button>
                                 <input type="text" name="masp" style="display: none;" value="<%=i.MASP%>">
                                 <input type="text" name="size" style="display: none;" value="<%=i.SIZE%>">

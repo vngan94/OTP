@@ -25,7 +25,7 @@
           </div>
           <div class="card-body">
             <div class="border p-3 rounded">
-              <form class="row g-3" action="/fermeh/admin/add-new-product" method="post">
+              <form class="row g-3" action="/fermeh/admin/add-new-product" method="post" onsubmit="return validate()" enctype="multipart/form-data">
                 <div class="row pt-3">
                   <div class="col-8">
                     <label class="form-label">Tên sản phẩm</label>
@@ -54,10 +54,27 @@
                   </div>
                 </div>
                 <div class="row pt-3">
-                  <div class="col-12">
-                    <label class="form-label">Ảnh sản phẩm</label>
-                    <input class="form-control" type="file" name="productimg" id="productimg"
-                      accept="image/png, image/jpeg,image/jpg">
+                  <div class="col-6">
+                    <label class="form-label">Ảnh thứ nhất</label>
+                    <input class="form-control" type="file" name="productimg1" id="productimg1"
+                      accept="image/png, image/jpeg,image/jpg" required >
+                  </div>
+                  <div class="col-6">
+                    <label class="form-label">Ảnh thứ 2</label>
+                    <input class="form-control" type="file" name="productimg2" id="productimg2"
+                      accept="image/png, image/jpeg,image/jpg" required>
+                  </div>
+                </div>
+                <div class="row pt-3">
+                  <div class="col-6">
+                    <label class="form-label">Ảnh thứ 3</label>
+                    <input class="form-control" type="file" name="productimg3" id="productimg3"
+                      accept="image/png, image/jpeg,image/jpg" required>
+                  </div>
+                  <div class="col-6">
+                    <label class="form-label">Ảnh thứ tư</label>
+                    <input class="form-control" type="file" name="productimg4" id="productimg4"
+                      accept="image/png, image/jpeg,image/jpg" required>
                   </div>
                 </div>
                 <div class="row pt-3">

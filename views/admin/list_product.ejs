@@ -24,26 +24,27 @@
         <div class="card-header py-3">
           <div class="row align-items-center m-0">
             <div class="col-md-3 col-12 me-auto mb-md-0 mb-3">
-                <select class="form-select">
-                    <option id="allCate">Tất cả các loại</option>
-                    <option id="allForMan">Dành cho nam</option>
-                    <option id="allForWoman">Dành cho nữ</option>
-                    <option id="allForChild">Dành cho trẻ em</option>
-                    <option id="allSneaker">Sneaker</option>
-                    <option id="allCasual">Casual</option>
-                    <option id="allHeel">Heel</option>
-                    <option id="allFormal">Formal</option>
-                    <option id="allSandal">Sandal</option>
+                <select class="form-select" id="select_type_filter">
+                    <option class="nothing_there" value="allCate" selected>Tất cả các loại</option>
+                    <option class="nothing_here" value="new">Sản phẩm mới nhập về</option>
+                    <option class="danhmuc" value="nam">Dành cho nam</option>
+                    <option class="danhmuc" value="nu">Dành cho nữ</option>
+                    <option class="danhmuc" value="treem">Dành cho trẻ em</option>
+                    <option class="ctloai" value="sneaker">Sneaker</option>
+                    <option class="ctloai" value="casual">Casual</option>
+                    <option class="ctloai" value="heel">Heel</option>
+                    <option class="ctloai" value="formal">Formal</option>
+                    <option class="ctloai" value="sandal">Sandal</option>
                 </select>
             </div>
             <div class="col-md-2 col-6">
                 <!-- <input type="date" class="form-control"> -->
             </div>
             <div class="col-md-2 col-6">
-                <select class="form-select">
+                <select class="form-select" id="select_status_filter">
                     <option>Tình trạng</option>
-                    <option id="stillSale">Vẫn còn đang bán</option>
-                    <option id="stopSale">Đã dừng bán</option>
+                    <option id="stillSale" value="stillSale">Vẫn còn đang bán</option>
+                    <option id="stopSale" value="stopsale">Đã dừng bán</option>
                 </select>
             </div>
          </div>
@@ -64,7 +65,7 @@
                 <th>Ngày ra mắt</th>
                 <th>Chỉnh sửa</th>
               </thead>
-              <tbody>
+              <tbody id="contain_all_product">
                 <%for(let i of product){%>
                 <tr>
                   <td>
@@ -73,7 +74,7 @@
                   <td class="productlist">
                     <a class="d-flex align-items-center gap-2" href="#">
                       <div class="product-box">
-                          <img src="/public/img/product/<%=i.IDHA%>_1.jpg" alt="">
+                          <img src="/public/img/product/<%=i.IDHA%>" alt="">
                       </div>
                       <div>
                           <h6 class="mb-0 product-title"><%=i.TENSP%></h6>
@@ -111,7 +112,7 @@
             </table>
           </div>
 
-    <nav class="float-end mt-4" aria-label="Page navigation">
+    <!-- <nav class="float-end mt-4" aria-label="Page navigation">
       <ul class="pagination">
         <li class="page-item disabled"><a class="page-link" href="#">Previous</a></li>
         <li class="page-item active"><a class="page-link" href="#">1</a></li>
@@ -119,7 +120,7 @@
         <li class="page-item"><a class="page-link" href="#">3</a></li>
         <li class="page-item"><a class="page-link" href="#">Next</a></li>
       </ul>
-    </nav>
+    </nav> -->
 
 </div>
 </div>
@@ -200,66 +201,7 @@
 
 <script src="/public/jquery/jquery-3.6.0.min.js"></script>
 <script src="/public/jquery/jquery-ui.js"></script>
+<script src="/public/js/admin/list_product.js"></script>
 <script>
-var linkView = document.querySelectorAll('.link_view_product')
-var linkEdit = document.querySelectorAll('.link_edit_product')
-var linkDel = document.querySelectorAll('.link_delete_product')
-for(let i of linkView){
-  i.onclick=()=>{
-    document.querySelector('#view_img').src=i.parentElement.parentElement.parentElement.children[1].children[0].children[0].children[0].src
-    $('#view_masp').val(i.parentElement.parentElement.parentElement.children[0].innerText)
-    $('#view_tensp').val(i.parentElement.parentElement.parentElement.children[1].children[0].children[1].innerText)
-    $('#view_loai').val(i.parentElement.parentElement.parentElement.children[2].innerText)
-    $('#view_ctloai').val(i.parentElement.parentElement.parentElement.children[4].innerText)
-    $('#view_danhmuc').val(i.parentElement.parentElement.parentElement.children[5].innerText)
-    $('#view_hangsx').val(i.parentElement.parentElement.parentElement.children[3].innerText)
-    $('#view_size').val(i.parentElement.parentElement.parentElement.children[6].innerText)
-    $('#view_gia').val(i.parentElement.parentElement.parentElement.children[7].innerText)
-    $('#view_ngayramat').val(i.parentElement.parentElement.parentElement.children[8].innerText)
-    $('#view_list_product').show()
-    $('body').addClass('prevent-scrolling')
-  }
-}
-//----------------------------XOA SAN PHAM
-$('#btn_cancel_delete').click((e)=>{
-    e.preventDefault()
-    $('#view_list_product').hide()
-    $('#form_view_list_product').show()
-    $('#check_delete_product').hide()
-    $('body').removeClass('prevent-scrolling')
-})
-$('#btn_submit_delete').click((e)=>{
-  e.preventDefault()
-  $.ajax({
-    url:"http://localhost:3000/fermeh/admin/list-product/del-product",
-    method:"POST",
-    data:{masp:$('#infor_for_delete').val()}
-  })
-  .done(()=>{
-    location.reload()
-  })
-  .fail(()=>{
-    console.log("delete product fail!!!")
-  })
-  location.reload()
-})
-for(let i of linkDel){
-  i.onclick=()=>{
-    $('#view_list_product').show()
-    $('#form_view_list_product').hide()
-    $('#check_delete_product').show()
-    $('body').addClass('prevent-scrolling')
-    $('#infor_for_delete').val(i.parentElement.parentElement.parentElement.children[0].innerText.split("#")[1])
-  }
-}
-for(let i of linkEdit){
-  i.onclick=()=>{
-    $('#edit_infor_masp').val(i.parentElement.parentElement.parentElement.parentElement.parentElement.children[0].innerText.split('#')[1])
-  }
-}
-document.querySelector('#btn_close_view').onclick=(e)=>{
-    e.preventDefault()
-    $('#view_list_product').hide()
-    $('body').removeClass('prevent-scrolling')
-}
+
 </script>

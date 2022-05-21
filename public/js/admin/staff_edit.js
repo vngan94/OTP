@@ -37,8 +37,8 @@ function validate() {
         $('#staffphone').removeClass('warning-border');
         $('#warning_text').text("")
     }
-    if (new Date(date) > new Date()) {
-        $('#staffdate').addClass('warning-border'); $('#warning_text').text("Ngày không đúng!!"); return false
+    if (new Date(date).getTime() >= new Date().getTime() - 86400000 * 365 * 18) {
+        $('#staffdate').addClass('warning-border'); $('#warning_text').text("Nhân viên phải lớn hơn 18 tuổi!!"); return false
     } else {
         $('#staffdate').removeClass('warning-border');
         $('#warning_text').text("")

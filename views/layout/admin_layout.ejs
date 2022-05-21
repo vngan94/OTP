@@ -54,7 +54,9 @@
                             <a class="nav-link" href="http://localhost:3000/fermeh/admin/list-customer">Khách hàng</a>
                         </li>
                         <li class="nav-item d-none d-xxl-block">
+                            <%if(role=='3'){%>
                             <a class="nav-link" href="http://localhost:3000/fermeh/admin/list-staff">Nhân viên</a>
+                            <%}%>
                         </li>
                     </ul>
                 </div>
@@ -106,7 +108,7 @@
                                     <a class="dropdown-item" href="/fermeh/admin/setting">
                                         <div class="d-flex align-items-center">
                                             <div class="setting-icon"><i class="bi bi-gear-fill"></i></div>
-                                            <div class="setting-text ms-3"><span>Cài đặt</span></div>
+                                            <div class="setting-text ms-3"><span>Đổi mật khẩu</span></div>
                                         </div>
                                     </a>
                                 </li>
@@ -162,16 +164,20 @@
                                             </div>
                                         </a>
                                     </div>
-                                    <div class="col">
-                                        <a href="/fermeh/admin/list-staff">
-                                            <div class="apps p-2 radius-10 text-center">
-                                                <div class="apps-icon-box mb-1 text-white bg-purple bg-gradient">
-                                                    <i class="bi bi-person-circle"></i>
+                                    
+                                        <%if(role=='3'){%>
+                                            <div class="col">
+                                            <a href="/fermeh/admin/list-staff">
+                                                <div class="apps p-2 radius-10 text-center">
+                                                    <div class="apps-icon-box mb-1 text-white bg-purple bg-gradient">
+                                                        <i class="bi bi-person-circle"></i>
+                                                    </div>
+                                                    <p class="mb-0 apps-name">Nhân viên</p>
                                                 </div>
-                                                <p class="mb-0 apps-name">Nhân viên</p>
-                                            </div>
-                                        </a>
-                                    </div>
+                                            </a>
+                                        </div>
+                                        <%}%>  
+                                    
                                     <div class="col">
                                         <a href="/fermeh/admin/sale-report">
                                             <div class="apps p-2 radius-10 text-center">
@@ -304,11 +310,13 @@
                                 </div>
                                 <small class="mb-0">Quản lý nhân viên</small>
                             </div>
-                            <a href="/fermeh/admin/list-staff" class="list-group-item"><i
+                            <%if(role=='3'){%>
+                                <a href="/fermeh/admin/list-staff" class="list-group-item"><i
                                     class="bi bi-person-lines-fill"></i>Danh sách nhân viên</a>
-                            <a href="/fermeh/admin/add-new-staff" class="list-group-item">
-                                <i class="bi bi-plus-square"></i>Thêm nhân viên mới</a>
-
+                                <a href="/fermeh/admin/add-new-staff" class="list-group-item">
+                                    <i class="bi bi-plus-square"></i>Thêm nhân viên mới</a>
+                            <%}%>
+                        
                         </div>
                     </div>
                     <div class="tab-pane fade" id="pills-tables">

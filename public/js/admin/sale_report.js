@@ -56,8 +56,8 @@ $('#report_type').change(() => {
                                     <tr>
                                         <th>${j.NAM}</th>
                                         <th>${j.SOHD}</th>
-                                        <th>${j.TONGTIEN}</th>
                                         <th>${j.SOSP}</th>
+                                        <th>${j.TONGTIEN}</th>
                                     </tr>
                                 `)
                             }
@@ -78,8 +78,8 @@ $('#report_type').change(() => {
                             <tr>
                                 <th>Tổng</th>
                                 <th>${res.sum.hd}</th>
-                                <th>${res.sum.tien}</th>
                                 <th>${res.sum.sp}</th>
+                                <th>${res.sum.tien}</th>
                             </tr>
                     `)
                 }
@@ -136,8 +136,8 @@ $('#submit_button').click((e) => {
                                     <tr>
                                         <th>${i}</th>
                                         <th>${j.SOHD}</th>
-                                        <th>${j.TONGTIEN}</th>
                                         <th>${j.SOSP}</th>
+                                        <th>${j.TONGTIEN}</th>
                                     </tr>
                                 `)
                             }
@@ -158,8 +158,8 @@ $('#submit_button').click((e) => {
                             <tr>
                                 <th>Tổng</th>
                                 <th>${res.sum.hd}</th>
-                                <th>${res.sum.tien}</th>
                                 <th>${res.sum.sp}</th>
+                                <th>${res.sum.tien}</th>
                             </tr>
                     `)
                 }
@@ -197,8 +197,8 @@ $('#submit_button').click((e) => {
                                     <tr>
                                         <th>${j.THANG}</th>
                                         <th>${j.SOHD}</th>
-                                        <th>${j.TONGTIEN}</th>
                                         <th>${j.SOSP}</th>
+                                        <th>${j.TONGTIEN}</th>
                                     </tr>
                                 `)
                             }
@@ -219,8 +219,8 @@ $('#submit_button').click((e) => {
                             <tr>
                                 <th>Tổng</th>
                                 <th>${res.sum.hd}</th>
-                                <th>${res.sum.tien}</th>
                                 <th>${res.sum.sp}</th>
+                                <th>${res.sum.tien}</th>
                             </tr>
                     `)
                 }

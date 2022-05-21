@@ -47,7 +47,7 @@
                                     <p class="card-text mb-5"></p>
                                     <hr>
                                     <form class="form-body" method="post"
-                                        action="http://localhost:3000/fermeh/admin/login">
+                                        action="http://localhost:3000/fermeh/admin/login" onsubmit="return validate()">
                                         <div class="row g-3">
                                             <div class="col-12">
                                                 <label for="inputUsername" class="form-label">Tên đăng nhập</label>
@@ -80,7 +80,7 @@
                                             </div>
                                             <div class="col-12">
                                                 <div class="d-grid">
-                                                    <span style="color:red;">
+                                                    <span style="color:red;" id="warning-text">
                                                         <%=(typeof error !="undefined" ? error : "" )%>
                                                     </span>
                                                 </div>
@@ -110,6 +110,7 @@
     <!--plugins-->
     <script src="/public/admin_site/js/jquery.min.js"></script>
     <script src="/public/admin_site/js/pace.min.js"></script>
+    <script src="/public/js/admin/login.js"></script>
 
 
 </body>

@@ -100,6 +100,10 @@
             cursor: pointer;
             background-color: #ccc;
         }
+        .disabled_element{
+            color: #ccc;
+            pointer-events: none;
+        }
     </style>
     <%if (cart=='' ){%>
         <div class="container" style="min-height: 800px;">
@@ -109,16 +113,27 @@
             </div>
         </div>
         <%}else{%>
+        <form action="http://localhost:3000/fermeh/payment" method="get">
+            <div class="container" style="min-height: 800px;display: none;">
+                <div class="row mt-5 non-product" style="height: 500px;">
+                    <div style="font-size: 20px;font-weight: 300;
+            position: relative;top: 68%;text-align: center;">Chưa có sản phẩm nào</div>
+                </div>
+            </div>
             <div class="container" style="min-height: 800px;position: relative;margin-bottom: 70px;">
                 <div class="row list-items mb-4">
                     <h5 style="font-weight: 700;">GIỎ HÀNG</h5>
                 </div>
                 <%for(let i of cart){%>
                     <div class="row">
-                        <div class="list-items col-8" id="product_<%=i.MASP%>_<%=i.SIZE%>">
+                        <div class="list-items col-8 contain_product_item" id="product_<%=i.MASP%>_<%=i.SIZE%>">
+                            <div title="<%=i.SOLUONG%>" style="display: none;"></div>
                             <div class="d-flex contain-product">
+                                <div class="d-flex align-items-center">
+                                    <input type="checkbox" name="chk_<%=i.MASP%>_<%=i.SIZE%>" id="" class="form-check-input me-2 chkbox_choose_product">
+                                </div>
                                 <div class="product-img">
-                                    <img src="/public/img/product/<%=i.IDHA%>_1.jpg" alt="product" class="img-fluid"
+                                    <img src="/public/img/product/<%=i.IDHA%>" alt="product" class="img-fluid"
                                         style="width: 100%;height: 100%;">
                                 </div>
                                 <div style="width: 100%;">
@@ -173,10 +188,8 @@
                                             <form action="/fermeh/cart/del-product" method="post">
                                                 <button class="btn btn-dark delete_btn"
                                                     value="<%=i.MASP%>_<%=i.SIZE%>">Xóa</button>
-                                                <input type="text" style="display: none;" name="masp"
-                                                    value="<%=i.MASP%>">
-                                                <input type="text" style="display: none;" name="size"
-                                                    value="<%=i.SIZE%>">
+                                                <input type="text" style="display: none;" value="<%=i.MASP%>">
+                                                <input type="text" style="display: none;" value="<%=i.SIZE%>">
                                             </form>
                                         </div>
                                     </div>
@@ -196,31 +209,28 @@
                                     <hr>
                                 </div>
                                 <div class="col-5 ps-0">
-                                    <h5 id="price_before" title="<%=tongtien%>">
-                                        <%=tongtien.toLocaleString('vi', {style : 'currency' , currency : 'VND' })%>
+                                    <h5 id="price_before" title="0">
+                                        0
                                     </h5>
-                                    <p>
-                                        <%=parseInt(30000).toLocaleString('vi', {style : 'currency' , currency : 'VND'
-                                            })%>
+                                    <p id="price_delivery" title="30000">
+                                        0
                                     </p>
                                     <hr>
-                                    <h5 id="price_total" title="<%=parseInt(30000)+tongtien%>">
-                                        <%=(parseInt(30000)+tongtien).toLocaleString('vi', {style : 'currency' ,
-                                            currency : 'VND' })%>
+                                    <h5 id="price_total" title="0">
+                                      0
                                     </h5>
                                     <hr>
                                 </div>
                             </div>
                             <div class="row mt-3">
-                                <form action="http://localhost:3000/fermeh/payment" method="get">
-                                    <div>
-                                        <button class="btn btn-dark">MUA HÀNG</button>
-                                    </div>
-                                </form>
+                                 <div>
+                                     <button class="btn btn-dark " id="buy_btn">MUA HÀNG</button>
+                                 </div>
                             </div>
                             <!-- </div> -->
                         </div>
             </div>
+        </form>
             <%}%>
                 <script src="/public/jquery/jquery-3.6.0.min.js"></script>
                 <script src="/public/js/cart.js"></script>
@@ -248,7 +258,7 @@
                     //         let bf = document.querySelector("#price_before")
                     //         let tt = document.querySelector("#price_total")
                     //         let value_bf = (parseInt(bf.title) -  money)
-                    //         let value_tt = (parseInt(tt.title) -  money)
+                    //         let value_t = (parseInt(tt.title) -  money)
                     //         bf.innerText = value_bf.toLocaleString('vi', {style : 'currency' ,
                     //                         currency : 'VND' })
                     //         tt.innerText = value_tt.toLocaleString('vi', {style : 'currency' ,

@@ -2,7 +2,7 @@ const sql = require('mssql/msnodesqlv8')
 
 var config = {
     server: "localhost",
-    user: "sa",
+    user: "MANAGER",
     password: '123',
     database: 'QLWEBBH',
     driver: 'msnodesqlv8'
