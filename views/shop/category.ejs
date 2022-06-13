@@ -179,6 +179,9 @@
                                 <h5 class="text-bold">
                                     <%=list[i].GIA%> VND
                                 </h5>
+                                <%if(typeof(list[i].SALE) != 'undefined'){%>
+                                    <p style="color: rgb(65, 161, 57);"><%=list[i].SALE%> off</p>
+                                <%}%>
                             </a>
                         </div>
                         <%}%>

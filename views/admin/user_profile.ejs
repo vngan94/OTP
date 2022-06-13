@@ -46,8 +46,8 @@
                     </div>
                     <div class="col-5">
                       <label class="form-label">Ngày sinh</label>
-                      <input type="date" class="form-control" value="<%=new Date(nv[0].NGAYSINH).getFullYear()%>-<%=new Date(nv[0].NGAYSINH).getMonth()<9?'0'+new Date(nv[0].NGAYSINH).getMonth():new Date(nv[0].NGAYSINH).getMonth()%>-<%=new Date(nv[0].NGAYSINH).getDate()<10?'0'+new Date(nv[0].NGAYSINH).getDate():new Date(nv[0].NGAYSINH).getDate()%>" 
-                      id="staffdate" name="staffdate" required>
+                      
+                      <input type="date" class="form-control" value="<%=Intl.DateTimeFormat('sv-SE').format(new Date(nv[0].NGAYSINH))%>" id="staffdate" name="staffdate" required>
                     </div>
                     <div class="col-5">
                       <label class="form-label">Số CMND/CCCD</label>

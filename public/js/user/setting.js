@@ -580,7 +580,7 @@ $('#btnChangeEmail').click((e) => {
         .fail(() => { })
         .done((res) => {
             if (res.error === false) {
-                $('#label_warning_change_email').text("Email không hợp lệ!")
+                $('#label_warning_change_email').text("Email không hợp lệ hoặc đã tồn tại!")
                 $('#newEmail').addClass('input-border-warning')
             }
             else {

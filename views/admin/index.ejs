@@ -120,7 +120,7 @@
               <div class="progress-wrapper">
                 <p class="mb-2">Giày thể thao<span class="float-end"><%=sneaker%>%</span></p>
                 <div class="progress" style="height: 6px;">
-                  <div class="progress-bar bg-gradient-purple" role="progressbar" style="width: 10%;"></div>
+                  <div class="progress-bar bg-gradient-purple progress-sneaker" role="progressbar" ></div>
                   <!-- <%=sneaker%> <%=casual%>  <%=formal%>  <%=heel%> <%=sandal%>-->
                 </div>
               </div>
@@ -128,7 +128,7 @@
               <div class="progress-wrapper">
                 <p class="mb-2">Giày casual<span class="float-end"><%=casual%>%</span></p>
                 <div class="progress" style="height: 6px;">
-                  <div class="progress-bar bg-gradient-danger" role="progressbar" style="width: 10%;"></div>
+                  <div class="progress-bar bg-gradient-danger progress-casual" role="progressbar" ></div>
                  
                 </div>
               </div>
@@ -136,7 +136,7 @@
               <div class="progress-wrapper">
                 <p class="mb-2">Giày da <span class="float-end"><%=formal%>%</span></p>
                 <div class="progress" style="height: 6px;">
-                  <div class="progress-bar bg-gradient-success" role="progressbar" style="width: 10%;"></div>
+                  <div class="progress-bar bg-gradient-success progress-formal" role="progressbar" ></div>
                  
                 </div>
               </div>
@@ -144,15 +144,20 @@
               <div class="progress-wrapper">
                 <p class="mb-2">Giày cao gót <span class="float-end"><%=heel%>%</span></p>
                 <div class="progress" style="height: 6px;">
-                  <div class="progress-bar bg-gradient-info" role="progressbar" style="width: 10%;"></div>
+                  <div class="progress-bar bg-gradient-info progress-heel" role="progressbar" ></div>
                  
                 </div>
               </div>
+              <div class="percent-sneaker" style="display: none;" title="<%=sneaker%>"></div>
+              <div class="percent-casual" style="display: none;" title="<%=casual%>"></div>
+              <div class="percent-formal" style="display: none;" title="<%=formal%>"></div>
+              <div class="percent-heel" style="display: none;" title="<%=heel%>"></div>
+              <div class="percent-sandal" style="display: none;" title="<%=sandal%>"></div>
               <div class="my-3 border-top"></div>
               <div class="progress-wrapper">
                 <p class="mb-2">Dép sandal <span class="float-end"><%=sandal%>%</span></p>
                 <div class="progress" style="height: 6px;">
-                  <div class="progress-bar bg-gradient-warning" role="progressbar" style="width: 10%;"></div>
+                  <div class="progress-bar bg-gradient-warning progress-sandal" role="progressbar" ></div>
                  
                 </div>
               <%}%>
@@ -302,6 +307,13 @@
 
   </main>
   <!--end page main-->
+  <script>
+    document.querySelector('.progress-sandal').style.width = `${document.querySelector('.percent-sandal').title}%`
+    document.querySelector('.progress-sneaker').style.width = `${document.querySelector('.percent-sneaker').title}%`
+    document.querySelector('.progress-casual').style.width = `${document.querySelector('.percent-casual').title}%`
+    document.querySelector('.progress-heel').style.width = `${document.querySelector('.percent-heel').title}%`
+    document.querySelector('.progress-formal').style.width = `${document.querySelector('.percent-formal').title}%`
+  </script>
 
 
   

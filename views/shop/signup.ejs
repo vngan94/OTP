@@ -48,9 +48,14 @@
                 <div class="mb-3" style="margin-top: 25px;">
                     <input type="text" class="form-control" id="phone" placeholder="Số điện thoại" required
                         name="phoneNumber" value="<%=(typeof phone != 'undefined' ? phone : '')%>">
-                    <label for="" class=" form-text" style="color: red;"></label>
+                    <!-- <label for="" class=" form-text" style="color: red;"></label> -->
                 </div>
-                <div class="mb-3">
+                <div class="mb-3" style="margin-top: 25px;">
+                    <input type="email" class="form-control" id="emailUser" placeholder="Email khôi phục" required
+                        name="emailUser" value="<%=(typeof phone != 'undefined' ? phone : '')%>">
+                    <!-- <label for="" class=" form-text" style="color: red;"></label> -->
+                </div>
+                <div class="mb-3" style="margin-top: 25px;">
                     <input type="password" class="form-control" id="password" placeholder="Mật khẩu"
                         required name="password" value="<%=(typeof pass != 'undefined' ? pass : '')%>">
                     <label for="" class="form-text" style="color: red;" id="warning">

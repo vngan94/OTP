@@ -6,6 +6,7 @@ const { connn, sqll } = require('../model/sqlServerAdmin')
 const axios = require('axios');
 const { response } = require('express');
 const cookieParser = require('cookie-parser');
+const nodemailer = require('nodemailer')
 route.use(cookieParser())
 //thư viện hỗ trợ upload ảnh
 const path = require('path');
@@ -152,7 +153,7 @@ route.post('/fermeh/admin/login', CatchAsync(async (req, res) => {
     let sql = `exec exe_chkAdminAccount '${username}'`
     await pool.request().query(sql, async (err, data) => {
         if (data.recordset.length === 0) {
-            res.send('admin/login', { error: "Tài khoản hoặc mật khẩu không chính xác!", done: false })
+            res.send({ error: "Tài khoản hoặc mật khẩu không chính xác!", done: false })
         } else {
             if (data.recordset[0].MATKHAU == cipherPass) {
                 role = parseInt(data.recordset[0].MAROLE);
@@ -200,6 +201,7 @@ route.post('/fermeh/admin/add-new-staff', upload.single('staffimg'), CatchAsync(
         let sql = `exec admin_createTKNV '${req.body.staffcode}',N'${req.body.staffname}','${req.body.staffdate}','${req.body.staffphone}'
 	,'${req.body.staffcmnd}','${req.file.filename}','${req.body.staffemail}','${req.body.staffgender}','${req.body.staffusername}'
     ,${parseInt(req.body.staffposition)},N'${req.body.stafflc}'`
+        let sqlEmail = `select EMAIL from NHANVIEN where EMAIL='${req.body.staffemail}'`
         await pool.request().query(`select MANV from NHANVIEN where MANV='${req.body.staffcode}'`, async (err, data) => {
             if (data.recordset.length == 0) {
                 await pool.request().query(`select SDT from NHANVIEN where SDT='${req.body.staffphone}'`, async (err, data) => {
@@ -208,8 +210,14 @@ route.post('/fermeh/admin/add-new-staff', upload.single('staffimg'), CatchAsync(
                             if (data.recordset.length == 0) {
                                 await pool.request().query(`select CMND from NHANVIEN where CMND='${req.body.staffcmnd}'`, async (err, data) => {
                                     if (data.recordset.length == 0) {
-                                        await pool.request().query(sql, async (err, data) => {
-                                            res.redirect('http://localhost:3000/fermeh/admin/list-staff')
+                                        await pool.request().query(sqlEmail, async (err, data) => {
+                                            if (data.recordset.length > 0) {
+                                                res.render('admin/add_new_staff', { title: 'Thêm nhân viên mới', error: 'Email da ton tai', infor: req.body, tentk: req.cookies.tentk, role: req.cookies.role })
+                                            } else {
+                                                await pool.request().query(sql, async (err, data) => {
+                                                    res.redirect('http://localhost:3000/fermeh/admin/list-staff')
+                                                })
+                                            }
                                         })
                                     } else {
                                         res.render('admin/add_new_staff', { title: 'Thêm nhân viên mới', error: 'Số CMND/CCCD đã tồn tại', infor: req.body, tentk: req.cookies.tentk, role: req.cookies.role })
@@ -242,7 +250,7 @@ route.get('/fermeh/admin/list-staff', async (req, res) => {
         let sql = 'select * from NHANVIEN where NGHIVIEC=0'
         await pool.request().query(sql, async (err, data) => {
             //console.log(data.recordset)
-            res.render('admin/list_staff', { title: "Danh sách nhân viên", staff: data.recordset, tentk: req.cookies.tentk, role: req.cookies.role })
+            res.render('admin/list_staff', { title: "Danh sách nhân viên", staff: data.recordset, tentk: req.cookies.tentk, role: req.cookies.role, manv: req.cookies.tknv })
         })
     }
     else {
@@ -411,22 +419,26 @@ route.post('/fermeh/admin/list-product/filter', CatchAsync(async (req, res) => {
     var sql
     if (req.body.type == 'danhmuc') {
         sql = `select LOAISANPHAM.*, IDHA = (select top 1 LINK FROM HINHANH where HINHANH.MASP = LOAISANPHAM.MASP),
-        TENHANG = (select TENHANG from HANGSX where HANGSX.MAHANG = LOAISANPHAM.HANGSX)
+        TENHANG = (select TENHANG from HANGSX where HANGSX.MAHANG = LOAISANPHAM.HANGSX),
+        SOLUONG=(SELECT COUNT(*) FROM SANPHAM WHERE SANPHAM.MASP=LOAISANPHAM.MASP AND SANPHAM.SOLD=0)
          from LOAISANPHAM where DANHMUC='${req.body.data.toUpperCase()}'`
     }
     else if (req.body.type == 'ctloai') {
         sql = `select LOAISANPHAM.*, IDHA = (select top 1 LINK FROM HINHANH where HINHANH.MASP = LOAISANPHAM.MASP),
-        TENHANG = (select TENHANG from HANGSX where HANGSX.MAHANG = LOAISANPHAM.HANGSX)
+        TENHANG = (select TENHANG from HANGSX where HANGSX.MAHANG = LOAISANPHAM.HANGSX),
+        SOLUONG=(SELECT COUNT(*) FROM SANPHAM WHERE SANPHAM.MASP=LOAISANPHAM.MASP AND SANPHAM.SOLD=0)
          from LOAISANPHAM where CTLOAI='${req.body.data.toUpperCase()}'`
     }
     else if (req.body.data == 'new') {
         sql = `select top 20 LOAISANPHAM.*, IDHA = (select top 1 LINK FROM HINHANH where HINHANH.MASP = LOAISANPHAM.MASP),
-        TENHANG = (select TENHANG from HANGSX where HANGSX.MAHANG = LOAISANPHAM.HANGSX)
+        TENHANG = (select TENHANG from HANGSX where HANGSX.MAHANG = LOAISANPHAM.HANGSX),
+        SOLUONG=(SELECT COUNT(*) FROM SANPHAM WHERE SANPHAM.MASP=LOAISANPHAM.MASP AND SANPHAM.SOLD=0)
         from LOAISANPHAM order by MASP desc`
     }
     else if (req.body.data == 'allCate') {
         sql = `select LOAISANPHAM.*, IDHA = (select top 1 LINK FROM HINHANH where HINHANH.MASP = LOAISANPHAM.MASP),
-        TENHANG = (select TENHANG from HANGSX where HANGSX.MAHANG = LOAISANPHAM.HANGSX)
+        TENHANG = (select TENHANG from HANGSX where HANGSX.MAHANG = LOAISANPHAM.HANGSX),
+        SOLUONG=(SELECT COUNT(*) FROM SANPHAM WHERE SANPHAM.MASP=LOAISANPHAM.MASP AND SANPHAM.SOLD=0)
         from LOAISANPHAM`
     }
     let pool = await conn
@@ -1005,8 +1017,8 @@ route.post('/fermeh/admin/user-profile', upload.single('staffimg'), CatchAsync(a
                             res.render('admin/user_profile', { title: "Thông tin", tentk: req.cookies.tentk, nv: data.recordset, role: req.cookies.role, err: "Số cmnd/cccd đã tồn tại!!" })
                         })
                     } else {
-                        let sql = `update NHANVIEN set TEN='${name}',NGAYSINH='${date}',SDT='${sdt}',CMND='${cmnd.trim()}',HINHANH='${ha}',
-                        EMAIL='${email}',GIOITINH='${gt}',DIACHI='${dc}' where MANV='${code.trim()}'`
+                        let sql = `update NHANVIEN set TEN=N'${name}',NGAYSINH='${date}',SDT='${sdt}',CMND='${cmnd.trim()}',HINHANH='${ha}',
+                        EMAIL='${email}',GIOITINH='${gt}',DIACHI=N'${dc}' where MANV='${code.trim()}'`
                         console.log(sql)
                         await pool.request().query(sql, async (err, data) => {
                             res.redirect('http://localhost:3000/fermeh/admin/user-profile')
@@ -1073,10 +1085,87 @@ route.post('/fermeh/admin/setting/changepass', CatchAsync(async (req, res) => {
 // route.get('/fermeh/admin/user-profile', async (req, res) => {
 //     res.render('admin/user_profile')
 // })
+route.get('/for-got-pass-word', async (req, res) => {
+    res.render('admin/test_file')
+})
+
+route.post('/for-got-pass-word', async (req, res) => {
+    var mail = req.body.email
+    let transporter = nodemailer.createTransport({
+        // service: "gmail",
+        host: 'smtp.gmail.com',
+        port: 465,
+        secure: true,
+        auth: {
+            user: "luffschloss@gmail.com", // generated ethereal user
+            pass: "lbukidsfdgufdswa", // generated ethereal password
+        },
+    });
+
+    // send mail with defined transport object
+    await transporter.sendMail({
+        from: "luffschloss@gmail.com", // sender address
+        to: "factyel.bttn@gmail.com", // list of receivers
+        subject: "Mat khau moi cua ban la:", // Subject line
+        text: "0123876", // plain text body
+        html: "<b>New pass: 0123876</b>", // html body
+    })
+    res.send("thanh cong ne")
+})
 
 
 
 route.get('/fermeh/admin/fogot-password', (req, res) => {
-    res.render('admin/fogot_password')
+    res.render("admin/fogot_password")
+})
+route.post('/fermeh/admin/email/send-new-pass', async (req, res) => {
+    let email = req.body.email
+    let pool = await conn
+    await pool.request().query(`select EMAIL from NHANVIEN where EMAIL='${email}'`, async (err, data) => {
+        if (data.recordset.length > 0) {
+            let alpha = 'abcdefghijklmnopqrstuvwxyz'
+            let str = "";
+            for (let i = 0; i < 2; i++) {
+                str += alpha.charAt(Math.random() * alpha.length)
+            }
+            str += new Date().getTime()
+            let cipherPass = ""
+            await axios({
+                method: 'GET',
+                url: 'https://api.hashify.net/hash/md5/hex?value=' + str,
+                data: null
+            }).then((res) => { cipherPass = res.data.Digest })
+                .catch((err) => { console.log("errrrr", err) })
+
+            let sql = `UPDATE TAIKHOAN_NV SET MATKHAU = '${cipherPass}' WHERE MANV=(SELECT MANV FROM NHANVIEN WHERE EMAIL='${email}')`
+            //console.log(sql)
+            await pool.request().query(sql, async (err, data) => {
+
+            })
+            let transporter = nodemailer.createTransport({
+                // service: "gmail",
+                host: 'smtp.gmail.com',
+                port: 465,
+                secure: true,
+                auth: {
+                    user: "luffschloss@gmail.com", // generated ethereal user
+                    pass: "lbukidsfdgufdswa", // generated ethereal password
+                },
+            });
+
+            // send mail with defined transport object
+            await transporter.sendMail({
+                from: "luffschloss@gmail.com", // sender address
+                to: `${email}`, // list of receivers
+                subject: "Mật khẩu mới của bạn là:", // Subject line
+                text: "password", // plain text body
+                html: `<b>Mật khẩu mới: ${str.trim()}</b>`, // html body
+            })
+            res.send({ done: true })
+        } else {
+            console.log(email)
+            res.send({ done: false, message: "Email không tồn tại hoặc không chính xác!" })
+        }
+    })
 })
 module.exports = route

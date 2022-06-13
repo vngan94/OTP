@@ -123,14 +123,15 @@ for (let i = 0; i < size_choice.length; i++) {
                 a.parentElement.parentElement.classList.remove('display-class')
                 var chk = false
                 for (let i of document.cookie.split(';')) {
-                    if (i.split('=')[0] == 'sdt') {
-                        if (i.split('=')[1] == '' || typeof (i.split('=')[1]) == 'undefined') {
+                    if (i.split('=')[0].trim() == 'sdt') {
+                        if (i.split('=')[1].trim() == '' || typeof (i.split('=')[1]) == 'undefined') {
                             chk = false
                         } else {
                             chk = true
                         }
                     }
                 }
+                console.log(chk)
                 if (chk == true) {
                     $.ajax({
                         url: "http://localhost:3000/fermeh/ajax/update-size-product",
@@ -302,15 +303,20 @@ for (let i of list_delete_btn) {
         if (parseInt(value_bf) === 0) {
             $('.non-product').show()
         }
+        let masp, size;
+        masp = i.parentElement.children[2].value
+        size = i.parentElement.children[3].value
         $.ajax({
             url: "/fermeh/cart/del-product",
             method: "POST",
-            data: { masp: i.parentElement.children[1].value, size: i.parentElement.children[2].value }
+            data: { masp: masp, size: size }
         })
             .done((res) => {
                 if (res.done == true) {
                     alert("Xóa sản phẩm thành công!!")
                     location.reload()
+                } else {
+                    alert("Xóa sản phẩm thất bại!!")
                 }
             })
             .fail(() => {

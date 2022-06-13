@@ -25,16 +25,17 @@
         <div class="card-header py-3">
           <div class="row align-items-center m-0">
             <div class="col-md-3 col-12 me-auto mb-md-0 mb-3">
-                <select class="form-select">
-                    <option id="allCate">Tất cả các loại</option>
-                    <option id="allForMan">Dành cho nam</option>
-                    <option id="allForWoman">Dành cho nữ</option>
-                    <option id="allForChild">Dành cho trẻ em</option>
-                    <option id="allSneaker">Sneaker</option>
-                    <option id="allCasual">Casual</option>
-                    <option id="allHeel">Heel</option>
-                    <option id="allFormal">Formal</option>
-                    <option id="allSandal">Sandal</option>
+                <select class="form-select" id="select_type_filter">
+                  <option class="nothing_there" value="allCate" selected>Tất cả các loại</option>
+                  <option class="nothing_here" value="new">Sản phẩm mới nhập về</option>
+                  <option class="danhmuc" value="nam">Dành cho nam</option>
+                  <option class="danhmuc" value="nu">Dành cho nữ</option>
+                  <option class="danhmuc" value="treem">Dành cho trẻ em</option>
+                  <option class="ctloai" value="sneaker">Sneaker</option>
+                  <option class="ctloai" value="casual">Casual</option>
+                  <option class="ctloai" value="heel">Heel</option>
+                  <option class="ctloai" value="formal">Formal</option>
+                  <option class="ctloai" value="sandal">Sandal</option>
                 </select>
             </div>
             <div class="col-md-2 col-6">
@@ -64,8 +65,10 @@
                 <th>Kho</th>
                 <th>Chi tiết</th>
               </thead>
-              <tbody>
+              <tbody id="contain_all_product">
+               
                 <%for(let i of product){%>
+                
                 <tr>
                   <td>
                     <span>#<%=i.MASP%></span>
@@ -93,6 +96,7 @@
                   </td>
                 </tr>
                 <%}%>
+              
               </tbody>
             </table>
           </div>
