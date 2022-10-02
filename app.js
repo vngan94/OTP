@@ -31,6 +31,13 @@ app.engine('ejs', ejsMate)
 //
 var taikhoan = 'Tài khoản';
 var sdt = '';
+
+// twilio
+const accountSid = 'AC5429aea41a4748909dc37c8ab7c3b028';
+const authToken = 'adbe381cdb3a8e7018ee968e5146dd4c'; // twilio nó đổi mỗi ngày, khi thi thì cập nhật lại
+const client = require('twilio')(accountSid, authToken);
+const sid = 'VA913c8372afba57319fde0f937880e089';
+
 //
 //----------------ALL FUNCTION---------------------------
 async function loadProduct() {
@@ -180,61 +187,93 @@ app.get('/fermeh/fogot-password', CatchAsync(async (req, res) => {
     res.render('shop/fogot_password', { title: "Quên mật khẩu" })
 }))
 app.post('/fermeh/fogot-password', CatchAsync(async (req, res) => {
-    let mail = req.body.mail
+    let phoneNumber = req.body.phoneNum
     let pool = await conn
-    await pool.request().query(`select EMAIL FROM KHACHHANG where EMAIL='${mail}'`, async (err, data) => {
+   
+        await pool.request().query(`select SDT FROM KHACHHANG where SDT='${phoneNumber}'`, async (err, data) => {
         if (data.recordset.length > 0) {
-            let alpha = 'abcdefghijklmnopqrstuvwxyz'
-            let str = "";
-            for (let i = 0; i < 2; i++) {
-                str += alpha.charAt(Math.random() * alpha.length)
-            }
-            str += new Date().getTime()
-            let cipherPass = ""
-            await axios({
-                method: 'GET',
-                url: 'https://api.hashify.net/hash/md5/hex?value=' + str,
-                data: null
-            }).then((res) => { cipherPass = res.data.Digest })
-                .catch((err) => { console.log("errrrr", err) })
-
-            let sql = `UPDATE TAIKHOAN_KH SET MATKHAU = '${cipherPass}' WHERE MAKH=(SELECT MAKH FROM KHACHHANG WHERE EMAIL='${mail}')`
-            //console.log(sql)
-            await pool.request().query(sql, async (err, data) => {
-
-            })
-            let transporter = nodemailer.createTransport({
-                // service: "gmail",
-                host: 'smtp.gmail.com',
-                port: 465,
-                secure: true,
-                auth: {
-                    user: "luffschloss@gmail.com", // generated ethereal user
-                    pass: "lbukidsfdgufdswa", // generated ethereal password
-                },
-            });
-
-            // send mail with defined transport object
-            await transporter.sendMail({
-                from: "luffschloss@gmail.com", // sender address
-                to: `${mail.trim()}`, // list of receivers
-                subject: "Mật khẩu mới của bạn là:", // Subject line
-                text: "password", // plain text body
-                html: `<b>Mật khẩu mới: ${str.trim()}</b>`, // html body
-            })
-            res.send({ done: true })
+             // send OTP
+            let str = phoneNumber;
+            str = '+84' + str.substring(1)
+            await client.verify.v2.services(sid)
+                .verifications
+                .create({ to: str, channel: 'sms' })
+                .then(data => {
+                     res.send({ done: true })
+             }).catch(err => {
+                console.log("Err" + err)
+                res.send({ done: false, message: "Lỗi gửi OTP!" })
+             })
+           
         } else {
-            res.send({ done: false, message: "Email không tồn tại!" })
+            res.send({ done: false, message: "Số điện thoại chưa được đăng kí!" })
         }
     })
 }))
+app.get('/fermeh/OTP/:phone', CatchAsync(async (req, res) => {
+    let x = req.params.phone
+    
+    res.render('shop/OTP', { title: "Xác nhận OTP", sdt:x })
+}))
+
+app.post('/fermeh/OTP', CatchAsync(async (req, res) => {
+    await client.verify.v2.services(sid)
+        .verificationChecks
+        .create({ to: req.body.phoneNumber, code: req.body.OTP})
+        .then(verification_check => {
+            console.log("verify status " + verification_check.status)
+            if (verification_check.status === 'approved') {
+                // xác nhận đúng
+                res.send({ done: true })
+            }
+            else {
+               
+                // nhập mã OTP sai
+                res.send({ done: false, message: "Mã OTP không đúng, vui lòng nhập lại!" })
+            }
+        })
+        .catch(err => {
+            console.log("check err ", err)
+            res.send({ done: false })
+        })
+    
+}))
+ 
+app.get('/fermeh/create-new-password/:phoneNumber', CatchAsync(async (req, res) => {
+    let x = req.params.phoneNumber
+    x = '0' + x.substring(3); 
+    console.log("get")
+    res.render('shop/createnewpass', {title: 'Tạo mật khẩu mới', sdt: x})
+}))
+
+app.post('/fermeh/create-new-password', CatchAsync(async (req, res) => {
+    let pass = req.body.password
+    let phoneNumber = req.body.phoneNumber
+    console.log("req", pass, phoneNumber)
+    let cipherPass = ""
+    await axios({
+        method: 'GET',
+        url: 'https://api.hashify.net/hash/md5/hex?value=' + pass,
+        data: null
+    }).then((res) => { cipherPass = res.data.Digest })
+        .catch((err) => { console.log("errrrr", err) })
+    console.log("cipher", cipherPass )
+    let sql = `UPDATE TAIKHOAN_KH SET MATKHAU = '${cipherPass}' WHERE MAKH=(SELECT MAKH FROM KHACHHANG WHERE SDT='${phoneNumber}')`
+      
+        let pool = await conn
+        await pool.request().query(sql)
+       
+    res.send({done: true})
+}))
+
+
 //--------------------------------QUEN MAT KHAU
 //
 //
 //
 //
 app.post('/fermeh/login', CatchAsync(async (req, res) => {
-    //console.log(req.body)
+    
     let phoneNum = req.body.phoneNumber
     let pass = req.body.password
     let cipherPass
